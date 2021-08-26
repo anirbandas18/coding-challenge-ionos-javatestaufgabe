@@ -1,0 +1,1 @@
+select * from s3export_sync_db.kunde;
