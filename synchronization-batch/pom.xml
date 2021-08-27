@@ -10,11 +10,11 @@
     </parent>
 
     <properties>
-        <start-class>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.SynchronizationServiceApplication</start-class>
+        <start-class>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.SynchronizationBatchApplication</start-class>
         <service.prefix>synchronization</service.prefix>
     </properties>
 
-    <artifactId>s3export-${service.prefix}-service</artifactId>
+    <artifactId>s3export-${service.prefix}-batch</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
@@ -45,6 +45,20 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${opencsv.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javatuples</groupId>
+            <artifactId>javatuples</artifactId>
+            <version>${javatuples.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

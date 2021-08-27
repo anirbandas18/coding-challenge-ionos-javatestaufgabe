@@ -17,7 +17,7 @@
 
     <modules>
         <module>partner-service</module>
-        <module>synchronization-service</module>
+        <module>synchronization-batch</module>
     </modules>
 
     <properties>
@@ -38,6 +38,9 @@
         <hoverfly.version>0.14.0</hoverfly.version>
         <jib-maven-plugin.version>3.1.4</jib-maven-plugin.version>
         <lombok.version>1.18.20</lombok.version>
+        <opencsv.version>5.5.1</opencsv.version>
+        <minio.version>8.3.0</minio.version>
+        <javatuples.version>1.2</javatuples.version>
     </properties>
 
     <dependencies>
@@ -103,6 +106,11 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
+        </dependency>
+       <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>${minio.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
