@@ -17,7 +17,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -34,10 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-@Component
 @Slf4j
-@StepScope
-public class SegmentationWriter implements ItemWriter<LandKundeAuftragCollectionVo> {
+public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragCollectionVo>> {
 
     private static final String FILE_EXTENSION_DELIMITTER = ".";
 
@@ -55,7 +52,7 @@ public class SegmentationWriter implements ItemWriter<LandKundeAuftragCollection
         this.storeBaseLocation = storeBaseLocation;
     }
 
-    @Value("${s3export.sync.timezone:ECT}")
+    @Value("${s3export.sync.timezone:Europe/Paris}")
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
@@ -99,9 +96,75 @@ public class SegmentationWriter implements ItemWriter<LandKundeAuftragCollection
         return dateAndTimeForFutureInUtc;
     }
 
-    @Override
-    public void write(List<? extends LandKundeAuftragCollectionVo> items) throws Exception {
+    @BeforeWrite
+    public void beforeWrite(List<? extends LandKundeAuftragCollectionVo> items) throws
+            MinioException, IOException, NoSuchAlgorithmException, InvalidKeyException {
+        String systemBaseLocation = System.getProperty("user.dir");
+        storageAbsolutePath = Paths.get(systemBaseLocation, storeBaseLocation);
+        fileNameFileLocationMap = new TreeMap<>();
+        int count = 0;
         for(LandKundeAuftragCollectionVo csvFileDetails : items) {
+            String country = csvFileDetails.getLand();
+            boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(country).build());
+            log.info("Bucket: {} exists: {}", country, found);
+            if (!found) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(country).build());
+                log.info("Created bucket: {} for upload", country);
+                count++;
+            }
+        }
+        log.info("Created {} buckets", count);
+    }
+
+    @AfterWrite
+    public void afterWrite(List<? extends LandKundeAuftragCollectionVo> items) throws
+            MinioException, IOException, NoSuchAlgorithmException, InvalidKeyException {
+        ZonedDateTime retentionTimestamp = getRetentionTimestamp();
+        Retention retention = new Retention(RetentionMode.COMPLIANCE, retentionTimestamp);
+        Map<String,Integer> uploadMetrics = new TreeMap<>();
+        for(LandKundeAuftragCollectionVo csvFileDetails : items) {
+            String country = csvFileDetails.getLand();
+            String timestamp = csvFileDetails.getDate();
+            String csvFileName = getFileName(country, timestamp);
+            if(fileNameFileLocationMap.containsKey(csvFileName)) {
+                String fileLocation = fileNameFileLocationMap.get(csvFileName);
+                log.info("File: {} exists at location: {}", fileLocation);
+                ObjectWriteResponse response = minioClient.uploadObject(
+                        UploadObjectArgs.builder()
+                                .bucket(country)
+                                .object(csvFileName)
+                                .contentType(MediaType.CSV_UTF_8.type())
+                                //.region("")
+                                .retention(retention)
+                                .filename(fileLocation)
+                                .build());
+                log.info("Uploaded file: {} to bucket: {}", csvFileName, country);
+                int count = uploadMetrics.containsKey(country) ? uploadMetrics.get(country) : 0;
+                uploadMetrics.put(country, ++count);
+            }
+        };
+        for(String country : uploadMetrics.keySet()) {
+            Integer count = uploadMetrics.get(country);
+            log.info("Uploaded {} files to bucket: {}", count, country);
+        }
+    }
+
+    /**
+     * Convert land kunde ayftrag mapping to csv line item
+     * Form csv file name
+     * Save land kunde auftrag map that is already grouped by map before coming into this flow as a csv file on file system
+     * After completing the write, upload all locally saved files to bucket via file name mapping on the basis of country against country based bucket name
+     * @param items
+     * @throws Exception
+     */
+    @Override
+    public void write(List<? extends List<LandKundeAuftragCollectionVo>> items) throws Exception {
+        if(items.isEmpty()) {
+            // abort job because no data to write
+            log.error("");
+        }
+        List<LandKundeAuftragCollectionVo> landkundeAuftraVoList = items.get(0);
+        for(LandKundeAuftragCollectionVo csvFileDetails : landkundeAuftraVoList) {
             String country = csvFileDetails.getLand();
             String timestamp = csvFileDetails.getDate();
             String csvFileName = getFileName(country, timestamp);
@@ -114,46 +177,8 @@ public class SegmentationWriter implements ItemWriter<LandKundeAuftragCollection
             sbc.write(lineItem);
             fileNameFileLocationMap.put(csvFileName, csvFilePath.toString());
             writer.close();
+            log.info("Saved file: {} to {}", csvFileName, csvFilePath);
         }
+        log.info("Saved {} files in total", fileNameFileLocationMap.size());
     }
-
-    @BeforeWrite
-    public void beforeWrite(List<? extends LandKundeAuftragCollectionVo> items) throws
-            MinioException, IOException, NoSuchAlgorithmException, InvalidKeyException {
-        String systemBaseLocation = System.getProperty("user.dir");
-        storageAbsolutePath = Paths.get(systemBaseLocation, storeBaseLocation);
-        fileNameFileLocationMap = new TreeMap<>();
-        for(LandKundeAuftragCollectionVo csvFileDetails : items) {
-            String country = csvFileDetails.getLand();
-            boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(country).build());
-            if (!found) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(country).build());
-            }
-        }
-    }
-
-    @AfterWrite
-    public void afterWrite(List<? extends LandKundeAuftragCollectionVo> items) throws
-            MinioException, IOException, NoSuchAlgorithmException, InvalidKeyException {
-        ZonedDateTime retentionTimestamp = getRetentionTimestamp();
-        Retention retention = new Retention(RetentionMode.COMPLIANCE, retentionTimestamp);
-        for(LandKundeAuftragCollectionVo csvFileDetails : items) {
-            String country = csvFileDetails.getLand();
-            String timestamp = csvFileDetails.getDate();
-            String csvFileName = getFileName(country, timestamp);
-            if(fileNameFileLocationMap.containsKey(csvFileName)) {
-                String fileLocation = fileNameFileLocationMap.get(csvFileName);
-                minioClient.uploadObject(
-                        UploadObjectArgs.builder()
-                                .bucket(country)
-                                .object(csvFileName)
-                                .contentType(MediaType.CSV_UTF_8.type())
-                                //.region("")
-                                .retention(retention)
-                                .filename(fileLocation)
-                                .build());
-            }
-        }
-    }
-
 }

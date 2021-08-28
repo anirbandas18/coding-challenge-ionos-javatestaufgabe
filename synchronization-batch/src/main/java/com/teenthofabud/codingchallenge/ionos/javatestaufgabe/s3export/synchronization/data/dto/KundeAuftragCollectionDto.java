@@ -7,6 +7,7 @@ import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Getter
@@ -14,7 +15,6 @@ import java.util.List;
 @ToString
 @RedisHash(value = "KundeAuftragCollection", timeToLive = 21600) // expire key after 6 hours
 @TypeAlias("KundeAuftragCollection")
-@NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 public class KundeAuftragCollectionDto {
@@ -27,6 +27,11 @@ public class KundeAuftragCollectionDto {
 
     public String getCacheKey() {
         return "KundeAuftragCollection: " + collectionKey;
+    }
+
+    public KundeAuftragCollectionDto() {
+        this.collectionKey = "";
+        this.kundeAuftragMap =  new LinkedList<>();
     }
 
 }

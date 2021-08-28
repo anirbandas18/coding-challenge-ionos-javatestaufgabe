@@ -60,25 +60,53 @@
         </if>
     </root>
 
-    <!-- LOG integration at TRACE level -->
-    <logger name="com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization" level="debug" additivity="false">
-        <appender-ref ref="RollingFile" />
-        <appender-ref ref="Console" />
-        <if condition='${logstash.enabled} == true'>
-            <then>
-                <appender-ref ref="Stash" />
-            </then>
-        </if>
-    </logger>
+    <if condition='&quot;${spring.profiles.active}&quot;.equals(&quot;local&quot;)'>
+        <then>
+            <logger name="com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization" level="info" additivity="false">
+                <appender-ref ref="RollingFile" />
+                <appender-ref ref="Console" />
+                <if condition='${logstash.enabled} == true'>
+                    <then>
+                        <appender-ref ref="Stash" />
+                    </then>
+                </if>
+            </logger>
 
-    <logger name="logging.level.org.hibernate.SQL" level="debug">
-        <appender-ref ref="RollingFile" />
-        <appender-ref ref="Console" />
-    </logger>
+            <logger name="logging.level.org.hibernate.SQL" level="debug">
+                <appender-ref ref="RollingFile" />
+                <appender-ref ref="Console" />
+            </logger>
 
-    <logger name="logging.level.org.hibernate.type.descriptor.sql.BasicBinder" level="trace">
-        <appender-ref ref="RollingFile" />
-        <appender-ref ref="Console" />
-    </logger>
+            <logger name="logging.level.org.hibernate.type.descriptor.sql.BasicBinder" level="trace">
+                <appender-ref ref="RollingFile" />
+                <appender-ref ref="Console" />
+            </logger>
+        </then>
+    </if>
+
+
+    <if condition='&quot;${spring.profiles.active}&quot;.equals(&quot;development&quot;)'>
+        <then>
+            <logger name="com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization" level="info" additivity="false">
+                <appender-ref ref="RollingFile" />
+                <appender-ref ref="Console" />
+                <if condition='${logstash.enabled} == true'>
+                    <then>
+                        <appender-ref ref="Stash" />
+                    </then>
+                </if>
+            </logger>
+
+            <logger name="logging.level.org.hibernate.SQL" level="debug">
+                <appender-ref ref="RollingFile" />
+                <appender-ref ref="Console" />
+            </logger>
+
+            <logger name="logging.level.org.hibernate.type.descriptor.sql.BasicBinder" level="trace">
+                <appender-ref ref="RollingFile" />
+                <appender-ref ref="Console" />
+            </logger>
+        </then>
+    </if>
 
 </configuration>

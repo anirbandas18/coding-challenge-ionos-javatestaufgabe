@@ -13,8 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@RedisHash("LandKundenMapDto")
-@TypeAlias("LandKundenMapDto")
+@RedisHash("LandKundenMap")
+@TypeAlias("LandKundenMap")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class LandKundenDto {
 
@@ -26,7 +26,7 @@ public class LandKundenDto {
     private String land;
 
     public String getCacheKey() {
-        return this.getClass().getSimpleName() + ": " + land;
+        return "LandKundenMap: " + land;
     }
 
 }

@@ -3,32 +3,33 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchron
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.AuftragKundeDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.AuftraegeEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 @Slf4j
-@StepScope
-public class FilteringProcessor implements ItemProcessor<AuftraegeEntity, AuftragKundeDto> {
+public class FilteringProcessor implements ItemProcessor<List<AuftraegeEntity>, List<AuftragKundeDto>> {
 
     /**
-     * Convert auftraege entity to auftrag-kunde map
-     * @param item
+     * Convert list of auftraege entity to list of auftrag kunde map
+     * @param items
      * @return
      * @throws Exception
      */
 
     @Override
-    public AuftragKundeDto process(AuftraegeEntity item) throws Exception {
-        AuftragKundeDto akDto = new AuftragKundeDto();
-        akDto.setAuftragId(item.getId().getAuftragId());
-        akDto.setArtikelNummer(item.getId().getArtikelNummber());
-        akDto.setKundeId(Long.parseLong(item.getId().getKundenId()));
-        log.info("Converted {} to {}", item, akDto);
-        return akDto;
+    public List<AuftragKundeDto> process(List<AuftraegeEntity> items) throws Exception {
+        List<AuftragKundeDto> auftragKundeDtos = new ArrayList<>(items.size());
+        for(AuftraegeEntity item : items) {
+            AuftragKundeDto akDto = new AuftragKundeDto();
+            akDto.setAuftragId(item.getId().getAuftragId());
+            akDto.setArtikelNummer(item.getId().getArtikelNummber());
+            akDto.setKundeId(Long.parseLong(item.getId().getKundenId()));
+            log.debug("Converted {} to {}", item, akDto);
+            auftragKundeDtos.add(akDto);
+        }
+        log.info("Processed {} AuftraegeEntity into {} AuftragKundeDto" , items.size(), auftragKundeDtos.size());
+        return auftragKundeDtos;
     }
 }

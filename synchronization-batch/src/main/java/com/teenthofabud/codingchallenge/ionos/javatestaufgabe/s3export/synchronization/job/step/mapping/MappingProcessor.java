@@ -1,19 +1,19 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.mapping;
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.AuftragKundeDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.KundeEntity;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.vo.KundeAuftragVo;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.KundeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
-@StepScope
-public class MappingProcessor implements ItemProcessor<AuftragKundeDto, KundeAuftragVo> {
+public class MappingProcessor implements ItemProcessor<List<AuftragKundeDto>, List<KundeAuftragDto>> {
 
     private KundeRepository entityRepository;
 
@@ -22,27 +22,39 @@ public class MappingProcessor implements ItemProcessor<AuftragKundeDto, KundeAuf
         this.entityRepository = entityRepository;
     }
 
+
+    private KundeAuftragDto convert(AuftragKundeDto item) throws Exception {
+        KundeAuftragDto dto = new KundeAuftragDto();
+        KundeEntity ke = entityRepository.findByKundenId(item.getKundeId());
+        dto.setFirma(ke.getFirmenName());
+        dto.setLand(ke.getLand());
+        dto.setNachName(ke.getNachName());
+        dto.setVorName(ke.getVorName());
+        dto.setPlz(ke.getPlz());
+        dto.setOrt(ke.getOrt());
+        dto.setStrasse(ke.getStrasse());
+        dto.setStrassenZuSatz(ke.getStrassenZuSatz());
+        dto.setKundeId(String.valueOf(ke.getKundenId()));
+        dto.setArtikelNummer(item.getArtikelNummer());
+        dto.setAuftragId(item.getAuftragId());
+        log.debug("Converted {} to {}", item, dto);
+        return dto;
+    }
+
     /**
-     * Convert auftrag kunde map to auftrag kunde csv line item format by retrieving full details of the associated kunde id from the given kunde auftrag map
-     * @param item
+     * Convert list of auftrag kunde map to list of kunde auftrag csv line item format by retrieving full details of the associated kunde id from the given auftrag kunde map
+     * @param items
      * @return
      * @throws Exception
      */
     @Override
-    public KundeAuftragVo process(AuftragKundeDto item) throws Exception {
-        KundeAuftragVo vo = new KundeAuftragVo();
-        KundeEntity ke = entityRepository.findByKundenId(item.getKundeId());
-        vo.setFirma(ke.getFirmenName());
-        vo.setLand(ke.getLand());
-        vo.setNachName(ke.getNachName());
-        vo.setVorName(ke.getVorName());
-        vo.setPlz(ke.getPlz());
-        vo.setOrt(ke.getOrt());
-        vo.setStrasse(ke.getStrasse());
-        vo.setStrassenZuSatz(ke.getStrassenZuSatz());
-        vo.setKundeId(String.valueOf(ke.getKundenId()));
-        vo.setArtikelNummer(item.getArtikelNummer());
-        vo.setAuftragId(item.getAuftragId());
-        return vo;
+    public List<KundeAuftragDto> process(List<AuftragKundeDto> items) throws Exception {
+        List<KundeAuftragDto> kundeAuftragDtoList = new ArrayList<>(items.size());
+        for(AuftragKundeDto dtoSrc : items) {
+            KundeAuftragDto dtoTrgt = convert(dtoSrc);
+            kundeAuftragDtoList.add(dtoTrgt);
+        }
+        log.info("Converted {} AuftragKundeDto to {} KundeAuftragDto", items.size(), kundeAuftragDtoList.size());
+        return kundeAuftragDtoList;
     }
 }

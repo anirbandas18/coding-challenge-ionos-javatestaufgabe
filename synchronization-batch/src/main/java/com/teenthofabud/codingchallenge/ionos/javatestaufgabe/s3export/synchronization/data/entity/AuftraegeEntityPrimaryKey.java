@@ -20,7 +20,7 @@ public class AuftraegeEntityPrimaryKey implements Serializable {
     @Column(name = "artikelnummer")
     private String artikelNummber;
     @ToString.Include
-    @Column(name = "kundenid")
+    @Column(name = "kundeid")
     private String kundenId;
 
 }

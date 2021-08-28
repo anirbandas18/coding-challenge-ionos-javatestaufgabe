@@ -8,6 +8,7 @@ logs/*
 # Mac
 .DS_Store
 **/.DS_Store
+**/ionos-javatestaufgabe-s3export/
 
 ### STS ###
 .apt_generated

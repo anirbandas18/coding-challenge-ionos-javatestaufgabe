@@ -12,16 +12,13 @@ import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-@Component
 @Slf4j
-@StepScope
-public class SegmentationProcessor implements ItemProcessor<LandKundenDto, LandKundeAuftragCollectionVo> {
+public class SegmentationProcessor implements ItemProcessor<List<LandKundenDto>, List<LandKundeAuftragCollectionVo>> {
 
     private StepExecution stepExecution;
     private String jobParameterName1;
@@ -66,32 +63,37 @@ public class SegmentationProcessor implements ItemProcessor<LandKundenDto, LandK
         vo.setVorName(dto.getVorName());
         vo.setStrassenZuSatz(dto.getStrassenZuSatz());
         vo.setLand(dto.getLand());
-        log.info("Converting {} to {}", dto, vo);
+        log.debug("Converting {} to {}", dto, vo);
         return vo;
     }
 
     /**
      * Mapping land kunde auftrag map dto directly with its associated land along with kunde auftrag collection along with job execution timestamp
-     * @param item
+     * @param items
      * @return
      * @throws Exception
      */
     @Override
-    public LandKundeAuftragCollectionVo process(LandKundenDto item) throws Exception {
-        List<KundeAuftragVo> csvLineItems = new ArrayList<>(item.getAssociatedKundenAuftrag().size());
-        List<KundeAuftragDto> associatedKundeAuftrag = item.getAssociatedKundenAuftrag();
-        for(KundeAuftragDto dto : associatedKundeAuftrag) {
-            KundeAuftragVo vo = convert(dto);
-            csvLineItems.add(vo);
+    public List<LandKundeAuftragCollectionVo> process(List<LandKundenDto> items) throws Exception {
+        List<LandKundeAuftragCollectionVo> voList = new ArrayList<>(items.size());
+        for(LandKundenDto item : items) {
+            List<KundeAuftragVo> csvLineItems = new ArrayList<>(item.getAssociatedKundenAuftrag().size());
+            List<KundeAuftragDto> associatedKundeAuftrag = item.getAssociatedKundenAuftrag();
+            for(KundeAuftragDto dto : associatedKundeAuftrag) {
+                KundeAuftragVo vo = convert(dto);
+                csvLineItems.add(vo);
+            }
+            String jobExecutionTimestamp = getJobExecutionTimestamp();
+            LandKundeAuftragCollectionVo vo = new LandKundeAuftragCollectionVo();
+            vo.setLand(item.getLand());
+            vo.setDate(jobExecutionTimestamp);
+            vo.setItems(csvLineItems);
+            log.info("Associated {} LandKundeDto items with land: {} key to LandKundeAuftragCollection for csv line item using timestamp: {}",
+                    csvLineItems.size(), item.getLand(), jobExecutionTimestamp);
+            voList.add(vo);
         }
-        String jobExecutionTimestamp = getJobExecutionTimestamp();
-        LandKundeAuftragCollectionVo vo = new LandKundeAuftragCollectionVo();
-        vo.setLand(item.getLand());
-        vo.setDate(jobExecutionTimestamp);
-        vo.setItems(csvLineItems);
-        log.info("Associated {} LandKundeDto items with land: {} key to LandKundeAuftragCollection for csv line item using timestamp: {}",
-                csvLineItems.size(), item.getLand(), jobExecutionTimestamp);
-        return vo;
-    }
 
+        log.info("Processed {} LandKundenDto into {} LandKundeAuftragCollectionVo" , items.size(), voList.size());
+        return voList;
+    }
 }

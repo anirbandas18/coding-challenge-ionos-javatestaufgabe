@@ -14,16 +14,13 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@Component
 @Slf4j
-@StepScope
-public class MappingWriter implements ItemWriter<KundeAuftragDto> {
+public class MappingWriter implements ItemWriter<List<KundeAuftragDto>> {
 
     private static final String FILE_NAME_DELIMITTER = "+";
     private static final String FILE_EXTENSION_DELIMITTER = ".";
@@ -71,28 +68,7 @@ public class MappingWriter implements ItemWriter<KundeAuftragDto> {
         this.stepExecution = stepExecution;
     }
 
-    /*private String getJobExecutionTimestamp() throws ParseException {
-        JobParameters jobParameters = stepExecution.getJobParameters();
-        Map<String, JobParameter> parametersMap = jobParameters.getParameters();
-        JobParameter parameter = parametersMap.get(jobParameterName1);
-        String jobParameterValue1 = parameter.getValue().toString();
-        SimpleDateFormat sdf = new SimpleDateFormat(timestampFormat);
-        Date jobDate = sdf.parse(jobParameterValue1);
-        String jobTimeStamp = sdf.format(jobDate);
-        return jobTimeStamp;
-    }
-
-    private String getFileName(String country, String timestamp) {
-        StringBuffer sbf = new StringBuffer();
-        sbf.append(country);
-        sbf.append(FILE_NAME_DELIMITTER);
-        sbf.append(timestamp);
-        sbf.append(FILE_EXTENSION_DELIMITTER);
-        sbf.append(fileExtension);
-        return sbf.toString();
-    }*/
-
-    private String getKundeAuftragCollectionKeyName() {
+    private String getKundeAuftragCollectionKeyValue() {
         String stepName = stepExecution.getStepName();
         JobExecution jobExecution = stepExecution.getJobExecution();
         String jobId = String.valueOf(jobExecution.getJobId());
@@ -116,19 +92,17 @@ public class MappingWriter implements ItemWriter<KundeAuftragDto> {
      * @throws Exception
      */
     @Override
-    public void write(List<? extends KundeAuftragDto> items) throws Exception {
-        String keyValue = getKundeAuftragCollectionKeyName();
+    public void write(List<? extends List<KundeAuftragDto>> items) throws Exception {
+        List<KundeAuftragDto> kundeAuftragDtoList = items.get(0);
+        String keyValue = getKundeAuftragCollectionKeyValue();
         log.info("Passing down kunde auftrag collection key value: {} for next step to access it via key name: {} and use it for further processing",
                 keyValue, kundeAuftragCollectionKeyName);
         ExecutionContext stepContext = stepExecution.getExecutionContext();
         stepContext.put(kundeAuftragCollectionKeyName, keyValue);
         KundeAuftragCollectionDto kundeAuftragCollectionDto = new KundeAuftragCollectionDto();
         kundeAuftragCollectionDto.setCollectionKey(keyValue);
-        kundeAuftragCollectionDto.setKundeAuftragMap(items);
-        if(repository.save(kundeAuftragCollectionDto) == null) {
-            // abort job because no data will be available for next step to process
-            log.error("");
-        }
-        log.info("Saved KundeAuftragCollection of size: {} with key: {}", items.size(), keyValue);
+        kundeAuftragCollectionDto.setKundeAuftragMap(kundeAuftragDtoList);
+        repository.save(kundeAuftragCollectionDto);
+        log.info("Saved KundeAuftragCollection of size: {} with key: {}", kundeAuftragDtoList.size(), keyValue);
     }
 }

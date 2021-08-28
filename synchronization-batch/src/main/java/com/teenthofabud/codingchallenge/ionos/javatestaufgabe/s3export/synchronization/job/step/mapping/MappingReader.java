@@ -11,15 +11,12 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
 @Slf4j
-@StepScope
 public class MappingReader implements ItemReader<List<AuftragKundeDto>> {
 
     private AuftragKundeCollectionRepository collectionRepository;
@@ -71,10 +68,6 @@ public class MappingReader implements ItemReader<List<AuftragKundeDto>> {
         }
         String keyValue = optKeyValue.get();
         AuftragKundeCollectionDto auftragKundeCollectionDto = collectionRepository.findByCollectionKey(keyValue);
-        if(auftragKundeCollectionDto == null || auftragKundeCollectionDto.getAuftragKundeMap().isEmpty()) {
-            // abort because intermediate data set for business logic is missing
-            log.error("");
-        }
         log.info("Retrieved auftrag kunde map collection of size: {} with key: {}", auftragKundeCollectionDto.getAuftragKundeMap().size(), keyValue);
         List<AuftragKundeDto> auftragKundeMap = auftragKundeCollectionDto.getAuftragKundeMap().stream().map(i -> (AuftragKundeDto) i).collect(Collectors.toList());
         return auftragKundeMap;

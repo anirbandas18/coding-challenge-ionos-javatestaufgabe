@@ -12,14 +12,14 @@ import javax.persistence.*;
 @ToString
 @Entity
 @Table(name = "auftraege")
-public class AuftraegeEntity extends TOABBaseEntity {
+public class AuftraegeEntity {
 
 
     @ToString.Include
     @Column(name = "created")
     private String created;
     @ToString.Include
-    @Column(name = "lastchanged")
+    @Column(name = "lastchange")
     private String lastChange;
     @ToString.Include
     @EmbeddedId

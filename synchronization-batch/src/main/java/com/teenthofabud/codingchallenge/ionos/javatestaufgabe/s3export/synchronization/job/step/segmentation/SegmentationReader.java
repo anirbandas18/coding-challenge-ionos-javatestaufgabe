@@ -2,25 +2,24 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchron
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragCollectionDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.LandCollectionDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.LandKundenDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.KundeAuftragCollectionRepository;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.LandCollectionRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
 @Slf4j
-@StepScope
 public class SegmentationReader implements ItemReader<List<LandKundenDto>> {
 
     private String kundeAuftragCollectionKeyName;
@@ -29,7 +28,6 @@ public class SegmentationReader implements ItemReader<List<LandKundenDto>> {
     private String distinctLandCollectionKeyName;
     private String jobParameterName1;
     private String keyNameDelimitter;
-    private LandCollectionRepository landCollectionRepository;
 
     @Value("${s3export.sync.distinctlandcollection.key.name:distinctLandCollectionKey}")
     public void setDistinctLandCollectionKeyName(String distinctLandCollectionKeyName) {
@@ -56,11 +54,6 @@ public class SegmentationReader implements ItemReader<List<LandKundenDto>> {
         this.kundeAuftragCollectionRepository = kundeAuftragCollectionRepository;
     }
 
-    @Autowired
-    public void setLandCollectionRepository(LandCollectionRepository landCollectionRepository) {
-        this.landCollectionRepository = landCollectionRepository;
-    }
-
     @BeforeStep
     public void setStepExecution(StepExecution stepExecution) {
         this.stepExecution = stepExecution;
@@ -77,18 +70,6 @@ public class SegmentationReader implements ItemReader<List<LandKundenDto>> {
             return Optional.empty();
         }
     }
-
-    /*private Optional<String> getDistinctLandCollectionKeyValue() {
-        JobExecution jobExecution = stepExecution.getJobExecution();
-        ExecutionContext jobContext = jobExecution.getExecutionContext();
-        Object value = jobContext.get(distinctLandCollectionKeyName);
-        if(value != null) {
-            String keyName = value.toString();
-            return Optional.of(keyName);
-        } else {
-            return Optional.empty();
-        }
-    }*/
 
     private List<LandKundenDto> groupKundeAuftragByland(List<KundeAuftragDto> kundeAuftragCollection, Set<String> distinctLand) {
         List<LandKundenDto> landKundenCollection = new ArrayList<>(distinctLand.size());
@@ -122,20 +103,9 @@ public class SegmentationReader implements ItemReader<List<LandKundenDto>> {
         }
         String keyValue = optKeyValue.get();
         KundeAuftragCollectionDto kundeAuftragCollectionDto = kundeAuftragCollectionRepository.findByCollectionKey(keyValue);
-        if(kundeAuftragCollectionDto == null || kundeAuftragCollectionDto.getKundeAuftragMap().isEmpty()) {
-            // abort because intermediate data set for business logic is missing
-            log.error("");
-        }
         log.info("Retrieved kunde auftrag map collection of size: {} with key: {}", kundeAuftragCollectionDto.getKundeAuftragMap().size(), keyValue);
         List<KundeAuftragDto> kundeAuftragCollection = kundeAuftragCollectionDto.getKundeAuftragMap().stream().map(i -> (KundeAuftragDto) i).collect(Collectors.toList());
         Set<String> distinctLand = kundeAuftragCollection.stream().map(i -> i.getLand()).collect(Collectors.toSet());
-        /*optKeyValue = getDistinctLandCollectionKeyValue();
-        if(!optKeyValue.isPresent()) {
-            // abort because intermediate value for retrieving data of business logic is missing
-            log.error("");
-        }
-        keyValue = optKeyValue.get();
-        LandCollectionDto landCollectionDto = landCollectionRepository.findByCollectionKey(keyValue);*/
         log.info("Retrieved {} distinct land from current kunde auftrag data set and stored against key: {} for use in future downstream step", distinctLand.size(), keyValue);
         List<LandKundenDto> landKundenCollection = groupKundeAuftragByland(kundeAuftragCollection, distinctLand);
         return landKundenCollection;

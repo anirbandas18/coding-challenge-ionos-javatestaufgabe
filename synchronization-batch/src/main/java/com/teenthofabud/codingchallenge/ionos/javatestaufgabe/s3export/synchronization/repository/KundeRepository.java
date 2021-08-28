@@ -12,9 +12,6 @@ import java.util.List;
 public interface KundeRepository extends JpaRepository<KundeEntity, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_READ)
-    public List<KundeEntity> findByLand(String land);
-
-    @Lock(LockModeType.PESSIMISTIC_READ)
     public KundeEntity findByKundenId(Long kundenId);
 
 }

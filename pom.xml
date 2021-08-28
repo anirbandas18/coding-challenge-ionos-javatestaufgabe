@@ -35,12 +35,11 @@
         <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
         <maven-surefire.version>3.0.0-M5</maven-surefire.version>
         <janino.version>3.1.4</janino.version>
-        <hoverfly.version>0.14.0</hoverfly.version>
         <jib-maven-plugin.version>3.1.4</jib-maven-plugin.version>
         <lombok.version>1.18.20</lombok.version>
         <opencsv.version>5.5.1</opencsv.version>
         <minio.version>8.3.0</minio.version>
-        <javatuples.version>1.2</javatuples.version>
+        <okhttp3.version>4.8.1</okhttp3.version>
     </properties>
 
     <dependencies>
@@ -59,18 +58,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-sleuth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-zipkin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-sleuth-zipkin</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -111,6 +98,17 @@
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
             <version>${minio.version}</version>
+           <exclusions>
+               <exclusion>
+                   <groupId>com.squareup.okhttp3</groupId>
+                   <artifactId>okhttp</artifactId>
+               </exclusion>
+           </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -126,12 +124,6 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback-encoder.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.specto</groupId>
-            <artifactId>hoverfly-java</artifactId>
-            <version>${hoverfly.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -150,17 +142,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>
