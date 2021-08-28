@@ -18,6 +18,7 @@
     <modules>
         <module>partner-service</module>
         <module>synchronization-batch</module>
+        <module>seed-batch</module>
     </modules>
 
     <properties>

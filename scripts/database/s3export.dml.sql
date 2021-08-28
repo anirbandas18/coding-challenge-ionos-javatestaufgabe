@@ -6,6 +6,8 @@ select str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000'), lastchange from s3expo
 
 select * from kunde;
 
+select * from auftraege;
+
 select kundeid, 
 TIMESTAMPDIFF(hour, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) as diff_utc, 
 TIMESTAMPDIFF(hour, current_timestamp(), str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) as diff_server,
@@ -15,6 +17,7 @@ TIMESTAMPDIFF(hour, current_timestamp(), convert_tz(str_to_date(lastchange, '%Y-
 from s3export_sync_db.auftraege where TIMESTAMPDIFF(hour, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) <= 99;
 
 select * from s3export_sync_db.auftraege where TIMESTAMPDIFF(hour, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) <= 99;
+select * from s3export_sync_db.auftraege where TIMESTAMPDIFF(minute, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) <= 99;
 
 
 select * from s3export_sync_db.auftraege where TIMESTAMPDIFF(hour, current_timestamp(), str_to_date(lastchange, '%Y-%M-%DT%H:%i:%S')) <= 3;
