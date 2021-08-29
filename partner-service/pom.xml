@@ -6,7 +6,8 @@
     <parent>
         <groupId>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export</groupId>
         <artifactId>s3export-tool</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0-RELEASE</version>
+        <!--<relativePath/>-->
     </parent>
 
     <properties>
@@ -14,8 +15,8 @@
         <service.prefix>partner</service.prefix>
     </properties>
 
-    <artifactId>s3export-${service.prefix}-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>s3export-partner-service</artifactId>
+    <version>1.0.0-RELEASE</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
 
@@ -45,22 +46,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-client</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

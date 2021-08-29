@@ -6,7 +6,8 @@
     <parent>
         <groupId>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export</groupId>
         <artifactId>s3export-tool</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0-RELEASE</version>
+        <!--<relativePath/>-->
     </parent>
 
     <properties>
@@ -15,9 +16,9 @@
     </properties>
 
     <artifactId>s3export-synchronization-batch</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-RELEASE</version>
     <packaging>jar</packaging>
-    <name>${service.prefix}-service</name>
+    <name>${service.prefix}-batch</name>
 
     <build>
         <finalName>${service.prefix}-app-${project.version}</finalName>
@@ -53,6 +54,11 @@
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>${opencsv.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
