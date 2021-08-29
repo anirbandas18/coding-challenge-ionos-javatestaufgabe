@@ -65,7 +65,7 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
     private String appName;
     private StepBuilderFactory stepBuilderFactory;
     private JobBuilderFactory jobBuilderFactory;
-    private String fileNameLocationCollectionKeyName;
+    private String fileBucketCollectionKeyName;
 
     @Value("${s3export.sync.store.base.path}")
     public void setStorageBaseLocation(String storageBaseLocation) {
@@ -102,9 +102,9 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
         this.kundeAuftragCollectionKeyName = kundeAuftragCollectionKeyName;
     }
 
-    @Value("${s3export.sync.filenamelocationcollection.key.name:fileNameLocationCollectionKey}")
-    public void setFileNameLocationCollectionKeyName(String fileNameLocationCollectionKeyName) {
-        this.fileNameLocationCollectionKeyName = fileNameLocationCollectionKeyName;
+    @Value("${s3export.sync.filebucketcollection.key.name:fileBucketCollectionKey}")
+    public void setFileBucketCollectionKeyName(String fileBucketCollectionKeyName) {
+        this.fileBucketCollectionKeyName = fileBucketCollectionKeyName;
     }
 
     @Value("${spring.application.name:synchronization-job}")
@@ -129,7 +129,7 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
     @Bean
     public ExecutionContextPromotionListener promotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[] { auftragKundeCollectionKeyName, kundeAuftragCollectionKeyName, fileNameLocationCollectionKeyName });
+        listener.setKeys(new String[] { auftragKundeCollectionKeyName, kundeAuftragCollectionKeyName, fileBucketCollectionKeyName });
         return listener;
     }
 

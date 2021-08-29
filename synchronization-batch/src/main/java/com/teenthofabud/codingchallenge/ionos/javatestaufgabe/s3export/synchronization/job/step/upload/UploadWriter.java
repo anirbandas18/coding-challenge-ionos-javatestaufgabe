@@ -6,14 +6,14 @@ import io.minio.MinioClient;
 import io.minio.ObjectWriteResponse;
 import io.minio.UploadObjectArgs;
 import io.minio.errors.MinioException;
-import io.minio.messages.Retention;
-import io.minio.messages.RetentionMode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -66,28 +66,30 @@ public class UploadWriter implements ItemWriter<List<FileBucketDto>> {
     @Override
     public void write(List<? extends List<FileBucketDto>> items) throws Exception {
         List<FileBucketDto> fileBucketDtoList = items.get(0);
-        ZonedDateTime retentionTimestamp = getRetentionTimestamp();
-        Retention retention = new Retention(RetentionMode.COMPLIANCE, retentionTimestamp);
         Map<String,Integer> uploadMetrics = new TreeMap<>();
         for(FileBucketDto fileBucketDto : fileBucketDtoList) {
             String fileLocation = fileBucketDto.getFileLocation();
-            log.info("File: {} exists at location: {}", fileLocation);
-            ObjectWriteResponse response = minioClient.uploadObject(
-                    UploadObjectArgs.builder()
-                            .bucket(fileBucketDto.getBucketName())
-                            .object(fileBucketDto.getFileName())
-                            .contentType(MediaType.CSV_UTF_8.type())
-                            //.region("")
-                            .retention(retention)
-                            .filename(fileLocation)
-                            .build());
-            log.info("Uploaded file: {} to bucket: {}", fileBucketDto.getFileName(), fileBucketDto.getBucketName());
-            int count = uploadMetrics.containsKey(fileBucketDto.getBucketName()) ? uploadMetrics.get(fileBucketDto.getBucketName()) : 0;
-            uploadMetrics.put(fileBucketDto.getBucketName(), ++count);
+            if(Files.exists(Paths.get(fileLocation))) {
+                log.debug("File: {} exists at its concerned location", fileLocation);
+                ObjectWriteResponse response = minioClient.uploadObject(
+                        UploadObjectArgs.builder()
+                                .bucket(fileBucketDto.getBucketName())
+                                .object(fileBucketDto.getFileName())
+                                .contentType(MediaType.CSV_UTF_8.type())
+                                //.region("")
+                                //.retention(retention)
+                                .filename(fileLocation)
+                                .build());
+                log.info("Uploaded file: {} to bucket: {}", fileBucketDto.getFileName(), fileBucketDto.getBucketName());
+                int count = uploadMetrics.containsKey(fileBucketDto.getBucketName()) ? uploadMetrics.get(fileBucketDto.getBucketName()) : 0;
+                uploadMetrics.put(fileBucketDto.getBucketName(), ++count);
+            } else {
+                log.debug("File: {} does not exist at its concerned location", fileLocation);
+            }
         };
         for(String country : uploadMetrics.keySet()) {
             Integer count = uploadMetrics.get(country);
-            log.info("Uploaded {} files to bucket: {}", count, country);
+            log.debug("Uploaded {} files to bucket: {}", count, country);
         }
     }
 }

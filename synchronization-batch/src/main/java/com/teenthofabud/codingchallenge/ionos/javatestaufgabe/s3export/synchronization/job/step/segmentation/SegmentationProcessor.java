@@ -9,12 +9,10 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Slf4j
@@ -22,17 +20,12 @@ public class SegmentationProcessor implements ItemProcessor<List<LandKundenDto>,
 
     private StepExecution stepExecution;
     private String jobParameterName1;
-    private String timestampFormat;
 
     @Value("${s3export.sync.job.parameter.1:synchronization-timestamp}")
     public void setJobParameterName1(String jobParameterName1) {
         this.jobParameterName1 = jobParameterName1;
     }
 
-    @Value("${s3export.sync.job.file.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
-    public void setTimestampFormat(String timestampFormat) {
-        this.timestampFormat = timestampFormat;
-    }
 
     @BeforeStep
     public void setStepExecution(StepExecution stepExecution) {
@@ -44,9 +37,6 @@ public class SegmentationProcessor implements ItemProcessor<List<LandKundenDto>,
         Map<String, JobParameter> parametersMap = jobParameters.getParameters();
         JobParameter parameter = parametersMap.get(jobParameterName1);
         String jobParameterValue1 = parameter.getValue().toString();
-        //SimpleDateFormat sdf = new SimpleDateFormat(timestampFormat);
-        //Date jobDate = sdf.parse(jobParameterValue1);
-        //String jobTimeStamp = sdf.format(jobDate);
         Long jobTimeStamp = Long.parseLong(jobParameterValue1);
         return jobTimeStamp;
     }
@@ -84,12 +74,10 @@ public class SegmentationProcessor implements ItemProcessor<List<LandKundenDto>,
                 KundeAuftragVo vo = convert(dto);
                 csvLineItems.add(vo);
             }
-            //String jobExecutionTimestamp = getJobExecutionTimestamp();
             Long jobExecutionTimestamp = getJobExecutionTimestamp();
             LandKundeAuftragCollectionVo vo = new LandKundeAuftragCollectionVo();
             vo.setLand(item.getLand());
             vo.setTimestamp(jobExecutionTimestamp);
-            //vo.setDate(jobExecutionTimestamp);
             vo.setItems(csvLineItems);
             log.debug("Associated {} LandKundeDto items with land: {} key to LandKundeAuftragCollection for csv line item using timestamp: {}",
                     csvLineItems.size(), item.getLand(), jobExecutionTimestamp);

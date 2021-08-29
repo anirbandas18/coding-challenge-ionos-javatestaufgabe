@@ -24,28 +24,10 @@ public class SegmentationReader implements ItemReader<List<LandKundenDto>> {
     private String kundeAuftragCollectionKeyName;
     private KundeAuftragCollectionRepository kundeAuftragCollectionRepository;
     private StepExecution stepExecution;
-    private String distinctLandCollectionKeyName;
-    private String jobParameterName1;
-    private String keyNameDelimitter;
-
-    @Value("${s3export.sync.distinctlandcollection.key.name:distinctLandCollectionKey}")
-    public void setDistinctLandCollectionKeyName(String distinctLandCollectionKeyName) {
-        this.distinctLandCollectionKeyName = distinctLandCollectionKeyName;
-    }
 
     @Value("${s3export.sync.kundeauftragcollection.key.name:kundeAuftragCollectionKey}")
     public void setKundeAuftragCollectionKeyName(String kundeAuftragCollectionKeyName) {
         this.kundeAuftragCollectionKeyName = kundeAuftragCollectionKeyName;
-    }
-
-    @Value("${s3export.sync.job.parameter.1:synchronization-timestamp}")
-    public void setJobParameterName1(String jobParameterName1) {
-        this.jobParameterName1 = jobParameterName1;
-    }
-
-    @Value("${s3export.sync.delimitter.key.name:~}")
-    public void setKeyNameDelimitter(String keyNameDelimitter) {
-        this.keyNameDelimitter = keyNameDelimitter;
     }
 
     @Autowired
