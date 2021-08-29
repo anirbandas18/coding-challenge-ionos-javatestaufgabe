@@ -1,14 +1,12 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.error;
 
-import com.teenthofabud.core.common.error.TOABBaseException;
-import com.teenthofabud.core.common.error.TOABError;
+public class SynchronizationException /*extends TOABBaseException*/ extends Exception {
 
-public class SynchronizationException extends TOABBaseException {
     public SynchronizationException(String message) {
         super(message);
     }
 
-    public SynchronizationException(String message, Object[] parameters) {
+    /*public SynchronizationException(String message, Object[] parameters) {
         super(message, parameters);
     }
 
@@ -27,5 +25,5 @@ public class SynchronizationException extends TOABBaseException {
     @Override
     public String getSubDomain() {
         return "job";
-    }
+    }*/
 }

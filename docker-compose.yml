@@ -27,7 +27,7 @@ services:
       - 9411:9411
 
   synchronization-service:
-    image: teenthofabud/s3export-synchronization-service:0.0.1-SNAPSHOT
+    image: teenthofabud/s3export-synchronization-batchß:0.0.1-SNAPSHOT
     container_name: synchronization-service
     restart: on-failure
     ports:

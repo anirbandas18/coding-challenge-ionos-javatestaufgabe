@@ -14,7 +14,7 @@ public class LandKundeAuftragCollectionVo {
     @ToString.Include
     private String land;
     @ToString.Include
-    private String date;
+    private Long timestamp;
     private List<KundeAuftragVo> items;
 
 }

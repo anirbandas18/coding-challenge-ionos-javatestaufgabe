@@ -43,18 +43,19 @@ public class SeedJobServiceImpl implements SeedJobService {
         this.synchronizationJob = synchronizationJob;
     }
 
-    //@Scheduled(cron = "${s3export.seed.job.cron:0 */1 * * * ?}", zone = "${s3export.seed.timezone:Europe/Paris}")
+    /**
+     * Run a new instance of this functionality's core job every configured amount of time as per the cron expression
+     * @throws SeedException
+     */
     @Scheduled(cron = "${s3export.seed.job.cron:0 */1 * * * ?}")
     public synchronized void runJob() throws SeedException {
         try {
-            //if(enabled.get()) {
-                Long synchronizationJobStartTime = System.currentTimeMillis();
-                JobParameters synchronizationJobParameters =   new JobParametersBuilder()
-                        .addLong(jobParameterName1, synchronizationJobStartTime).toJobParameters();
-                log.info("Starting job with parameters: {}", synchronizationJobParameters);
-                JobExecution synchronizationJobExecution = jobLauncher.run(synchronizationJob, synchronizationJobParameters);
-                batchRunCounter.incrementAndGet();
-            //}
+            Long synchronizationJobStartTime = System.currentTimeMillis();
+            JobParameters synchronizationJobParameters =   new JobParametersBuilder()
+                    .addLong(jobParameterName1, synchronizationJobStartTime).toJobParameters();
+            log.info("Starting job with parameters: {}", synchronizationJobParameters);
+            JobExecution synchronizationJobExecution = jobLauncher.run(synchronizationJob, synchronizationJobParameters);
+            batchRunCounter.incrementAndGet();
         } catch (JobExecutionAlreadyRunningException e) {
             throw new SeedException(e.getMessage());
         } catch (JobRestartException e) {

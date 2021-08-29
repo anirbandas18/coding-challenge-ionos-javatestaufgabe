@@ -72,12 +72,12 @@
                 </if>
             </logger>
 
-            <logger name="logging.level.org.hibernate.SQL" level="debug">
+            <logger name="logging.level.org.hibernate.SQL" level="info">
                 <appender-ref ref="RollingFile" />
                 <appender-ref ref="Console" />
             </logger>
 
-            <logger name="logging.level.org.hibernate.type.descriptor.sql.BasicBinder" level="trace">
+            <logger name="logging.level.org.hibernate.type.descriptor.sql.BasicBinder" level="info">
                 <appender-ref ref="RollingFile" />
                 <appender-ref ref="Console" />
             </logger>

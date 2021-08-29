@@ -2,14 +2,13 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchron
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragCollectionDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.KundeAuftragCollectionRepository;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.redis.KundeAuftragCollectionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +52,7 @@ public class MappingWriter implements ItemWriter<List<KundeAuftragDto>> {
         this.fileExtension = fileExtension;
     }
 
-    @Value("${s3export.sync.job.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
+    @Value("${s3export.sync.job.file.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
     public void setTimestampFormat(String timestampFormat) {
         this.timestampFormat = timestampFormat;
     }

@@ -4,17 +4,16 @@ import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.data
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.data.entity.AuftraegeEntityPrimaryKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.time.LocalDateTime;
-import java.time.Year;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
-public class SeedProcessor implements ItemProcessor<AuftraegeEntity, AuftraegeEntity> {
+public class SeedProcessor implements ItemProcessor<AuftraegeEntity, AuftraegeEntity>, InitializingBean {
 
     public Long kundeIdLowerBound;
     public Long kundeIdUpperBound;
@@ -24,6 +23,7 @@ public class SeedProcessor implements ItemProcessor<AuftraegeEntity, AuftraegeEn
     public Integer lastChangeYearLowerBound;
     private String timestampFormat;
     private String timezone;
+    private DateTimeFormatter dtf;
 
     @Value("${s3export.seed.timezone:Europe/Paris}")
     public void setTimezone(String timezone) {
@@ -158,15 +158,27 @@ public class SeedProcessor implements ItemProcessor<AuftraegeEntity, AuftraegeEn
         return createdTimestamp;
     }
 
+    private String getCurrentTimestamp() {
+        OffsetDateTime utcNow = OffsetDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime utcZoneDateTime = utcNow.toZonedDateTime();
+        String timestamp = utcZoneDateTime.format(dtf);
+        return timestamp;
+    }
+
     @Override
     public AuftraegeEntity process(AuftraegeEntity item) throws Exception {
         AuftraegeEntityPrimaryKey pk = item.getId();
         pk.setArtikelNummber(getArtikelNummer());
         pk.setAuftragId(getAuftragId());
         pk.setKundenId(getKundeId());
-        item.setCreated(getCreated());
-        item.setLastChange(getLastChange());
+        item.setCreated(getCurrentTimestamp());
+        item.setLastChange(getCurrentTimestamp());
         item.setId(pk);
         return item;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        dtf = DateTimeFormatter.ofPattern(timestampFormat);
     }
 }

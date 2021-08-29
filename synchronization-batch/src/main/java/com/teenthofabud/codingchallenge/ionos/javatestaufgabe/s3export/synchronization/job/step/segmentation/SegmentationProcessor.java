@@ -29,7 +29,7 @@ public class SegmentationProcessor implements ItemProcessor<List<LandKundenDto>,
         this.jobParameterName1 = jobParameterName1;
     }
 
-    @Value("${s3export.sync.job.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
+    @Value("${s3export.sync.job.file.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
     public void setTimestampFormat(String timestampFormat) {
         this.timestampFormat = timestampFormat;
     }
@@ -39,14 +39,15 @@ public class SegmentationProcessor implements ItemProcessor<List<LandKundenDto>,
         this.stepExecution = stepExecution;
     }
 
-    private String getJobExecutionTimestamp() throws ParseException {
+    private Long getJobExecutionTimestamp() throws ParseException {
         JobParameters jobParameters = stepExecution.getJobParameters();
         Map<String, JobParameter> parametersMap = jobParameters.getParameters();
         JobParameter parameter = parametersMap.get(jobParameterName1);
         String jobParameterValue1 = parameter.getValue().toString();
-        SimpleDateFormat sdf = new SimpleDateFormat(timestampFormat);
-        Date jobDate = sdf.parse(jobParameterValue1);
-        String jobTimeStamp = sdf.format(jobDate);
+        //SimpleDateFormat sdf = new SimpleDateFormat(timestampFormat);
+        //Date jobDate = sdf.parse(jobParameterValue1);
+        //String jobTimeStamp = sdf.format(jobDate);
+        Long jobTimeStamp = Long.parseLong(jobParameterValue1);
         return jobTimeStamp;
     }
 
@@ -83,12 +84,14 @@ public class SegmentationProcessor implements ItemProcessor<List<LandKundenDto>,
                 KundeAuftragVo vo = convert(dto);
                 csvLineItems.add(vo);
             }
-            String jobExecutionTimestamp = getJobExecutionTimestamp();
+            //String jobExecutionTimestamp = getJobExecutionTimestamp();
+            Long jobExecutionTimestamp = getJobExecutionTimestamp();
             LandKundeAuftragCollectionVo vo = new LandKundeAuftragCollectionVo();
             vo.setLand(item.getLand());
-            vo.setDate(jobExecutionTimestamp);
+            vo.setTimestamp(jobExecutionTimestamp);
+            //vo.setDate(jobExecutionTimestamp);
             vo.setItems(csvLineItems);
-            log.info("Associated {} LandKundeDto items with land: {} key to LandKundeAuftragCollection for csv line item using timestamp: {}",
+            log.debug("Associated {} LandKundeDto items with land: {} key to LandKundeAuftragCollection for csv line item using timestamp: {}",
                     csvLineItems.size(), item.getLand(), jobExecutionTimestamp);
             voList.add(vo);
         }

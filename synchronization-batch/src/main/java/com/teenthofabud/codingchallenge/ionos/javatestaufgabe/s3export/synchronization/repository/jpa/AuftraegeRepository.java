@@ -1,9 +1,9 @@
-package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository;
+package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.jpa;
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.AuftraegeEntity;
-import feign.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;

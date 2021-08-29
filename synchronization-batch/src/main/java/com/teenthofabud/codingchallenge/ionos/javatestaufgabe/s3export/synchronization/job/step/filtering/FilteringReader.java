@@ -1,7 +1,7 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.filtering;
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.AuftraegeEntity;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.AuftraegeRepository;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.jpa.AuftraegeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.NonTransientResourceException;

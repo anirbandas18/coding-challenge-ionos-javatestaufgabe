@@ -1,4 +1,4 @@
-package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository;
+package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.jpa;
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.KundeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

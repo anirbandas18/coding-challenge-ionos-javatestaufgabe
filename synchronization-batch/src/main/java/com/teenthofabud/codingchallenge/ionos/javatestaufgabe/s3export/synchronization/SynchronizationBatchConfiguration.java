@@ -1,6 +1,7 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization;
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.AuftragKundeDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.FileBucketDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.LandKundenDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.AuftraegeEntity;
@@ -9,13 +10,20 @@ import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchroni
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.listener.TOABNoWorkFoundStepExecutionListener;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.filtering.FilteringProcessor;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.filtering.FilteringReader;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.filtering.FilteringTask;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.filtering.FilteringWriter;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.mapping.MappingProcessor;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.mapping.MappingReader;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.mapping.MappingTask;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.mapping.MappingWriter;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.segmentation.SegmentationProcessor;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.segmentation.SegmentationReader;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.segmentation.SegmentationTask;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.segmentation.SegmentationWriter;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.upload.UploadProcessor;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.upload.UploadReader;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.upload.UploadTask;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.upload.UploadWriter;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -41,9 +49,9 @@ import java.util.List;
 
 @Configuration
 @EnableBatchProcessing
-@EnableRedisRepositories
+@EnableRedisRepositories(basePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.redis" })
 @EnableScheduling
-@EnableJpaRepositories
+@EnableJpaRepositories(basePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.jpa" })
 @Slf4j
 public class SynchronizationBatchConfiguration implements InitializingBean {
 
@@ -53,14 +61,15 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
     private String bucketBaseUrl;
     private String bucketAccessKey;
     private String bucketSecretKey;
-    private String storeBaseLocation;
+    private String storageBaseLocation;
     private String appName;
     private StepBuilderFactory stepBuilderFactory;
     private JobBuilderFactory jobBuilderFactory;
+    private String fileNameLocationCollectionKeyName;
 
-    @Value("${s3export.sync.store.base.path:/ionos-javatestaufgabe-s3export/s3export-synchronization-batch}")
-    public void setStoreBaseLocation(String storeBaseLocation) {
-        this.storeBaseLocation = storeBaseLocation;
+    @Value("${s3export.sync.store.base.path}")
+    public void setStorageBaseLocation(String storageBaseLocation) {
+        this.storageBaseLocation = storageBaseLocation;
     }
 
     @Value("${s3export.sync.bucket.base.url:https://play.min.io}")
@@ -93,6 +102,11 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
         this.kundeAuftragCollectionKeyName = kundeAuftragCollectionKeyName;
     }
 
+    @Value("${s3export.sync.filenamelocationcollection.key.name:fileNameLocationCollectionKey}")
+    public void setFileNameLocationCollectionKeyName(String fileNameLocationCollectionKeyName) {
+        this.fileNameLocationCollectionKeyName = fileNameLocationCollectionKeyName;
+    }
+
     @Value("${spring.application.name:synchronization-job}")
     public void setAppName(String appName) {
         this.appName = appName;
@@ -115,7 +129,7 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
     @Bean
     public ExecutionContextPromotionListener promotionListener() {
         ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[] { auftragKundeCollectionKeyName, kundeAuftragCollectionKeyName });
+        listener.setKeys(new String[] { auftragKundeCollectionKeyName, kundeAuftragCollectionKeyName, fileNameLocationCollectionKeyName });
         return listener;
     }
 
@@ -130,9 +144,8 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        String systemBaseLocation = System.getProperty("user.dir");
-        Path storageAbsolutePath = Paths.get(systemBaseLocation, storeBaseLocation);
-        Files.createDirectories(storageAbsolutePath.getParent());
+        Path storageAbsolutePath = Paths.get(storageBaseLocation);
+        Files.createDirectories(storageAbsolutePath);
         log.info("Creating all directories if not present within the absolute path: {}", storageAbsolutePath);
     }
 
@@ -155,14 +168,19 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
     }
 
     @Bean
+    @StepScope
+    public FilteringTask filteringTask() {
+        return new FilteringTask();
+    }
+
+    @Bean
     public Step filtering() {
         return stepBuilderFactory.get("filtering")
-                .<List<AuftraegeEntity>, List<AuftragKundeDto>>chunk(batchSize)
-                .reader(filteringReader())
-                .processor(filteringProcessor())
-                .writer(filteringWriter())
+                .tasklet(filteringTask())
                 .listener(new TOABNoWorkFoundStepExecutionListener())
-                .listener(new TOABItemFailureListener<List<AuftragKundeDto>, List<KundeAuftragDto>>())
+                .listener(new TOABItemFailureListener<List<AuftraegeEntity>, List<KundeAuftragDto>>())
+                .listener(promotionListener())
+                .listener(filteringWriter())
                 .build();
     }
 
@@ -185,14 +203,20 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
     }
 
     @Bean
+    @StepScope
+    public MappingTask mappingTask() {
+        return new MappingTask();
+    }
+
+    @Bean
     public Step mapping() {
         return stepBuilderFactory.get("mapping")
-                .<List<AuftragKundeDto>, List<KundeAuftragDto>>chunk(batchSize)
-                .reader(new MappingReader())
-                .processor(new MappingProcessor())
-                .writer(new MappingWriter())
+                .tasklet(mappingTask())
                 .listener(new TOABNoWorkFoundStepExecutionListener())
                 .listener(new TOABItemFailureListener<List<AuftragKundeDto>, List<KundeAuftragDto>>())
+                .listener(promotionListener())
+                .listener(mappingReader())
+                .listener(mappingWriter())
                 .build();
     }
 
@@ -215,14 +239,56 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
     }
 
     @Bean
+    @StepScope
+    public SegmentationTask segmentationTask() {
+        return new SegmentationTask();
+    }
+
+    @Bean
     public Step segmentation() {
         return stepBuilderFactory.get("segmentation")
-                .<List<LandKundenDto>, List<LandKundeAuftragCollectionVo>>chunk(batchSize)
-                .reader(segmentationReader())
-                .processor(segmentationProcessor())
-                .writer(segmentationWriter())
+                .tasklet(segmentationTask())
                 .listener(new TOABNoWorkFoundStepExecutionListener())
-                .listener(new TOABItemFailureListener<List<AuftragKundeDto>, List<KundeAuftragDto>>())
+                .listener(new TOABItemFailureListener<List<LandKundenDto>, List<LandKundeAuftragCollectionVo>>())
+                .listener(promotionListener())
+                .listener(segmentationReader())
+                .listener(segmentationProcessor())
+                .listener(segmentationWriter())
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public UploadReader uploadReader() {
+        return new UploadReader();
+    }
+
+    @Bean
+    @StepScope
+    public UploadProcessor uploadProcessor() {
+        return new UploadProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public UploadWriter uploadWriter() {
+        return new UploadWriter();
+    }
+
+    @Bean
+    @StepScope
+    public UploadTask uploadTask() {
+        return new UploadTask();
+    }
+
+    @Bean
+    public Step upload() {
+        return stepBuilderFactory.get("upload")
+                .tasklet(uploadTask())
+                .listener(new TOABNoWorkFoundStepExecutionListener())
+                .listener(new TOABItemFailureListener<List<FileBucketDto>, List<FileBucketDto>>())
+                .listener(promotionListener())
+                .listener(uploadReader())
                 .build();
     }
 
@@ -232,6 +298,7 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
                 .start(filtering())
                 .next(mapping())
                 .next(segmentation())
+                .next(upload())
                 .build();
     }
 

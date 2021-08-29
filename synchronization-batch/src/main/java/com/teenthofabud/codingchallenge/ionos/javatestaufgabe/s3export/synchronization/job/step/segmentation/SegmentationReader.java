@@ -3,12 +3,11 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchron
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragCollectionDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragDto;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.LandKundenDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.KundeAuftragCollectionRepository;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.redis.KundeAuftragCollectionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,7 +78,7 @@ public class SegmentationReader implements ItemReader<List<LandKundenDto>> {
             lkDto.setLand(land);
             lkDto.setAssociatedKundenAuftrag(associatedKundenAuftrag);
             landKundenCollection.add(lkDto);
-            log.info("Land {} has associations with {} kunde auftrag mapping", land,
+            log.debug("Land {} has associations with {} kunde auftrag mapping", land,
                     associatedKundenAuftrag == null || associatedKundenAuftrag.isEmpty() ? 0 :associatedKundenAuftrag.size());
         }
         return landKundenCollection;

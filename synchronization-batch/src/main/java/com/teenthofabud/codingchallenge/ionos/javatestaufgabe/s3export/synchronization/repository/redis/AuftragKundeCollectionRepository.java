@@ -1,4 +1,4 @@
-package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository;
+package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.redis;
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.AuftragKundeCollectionDto;
 import org.springframework.data.repository.CrudRepository;

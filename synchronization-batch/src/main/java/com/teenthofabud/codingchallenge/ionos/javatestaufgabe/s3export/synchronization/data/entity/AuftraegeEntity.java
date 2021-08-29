@@ -1,6 +1,5 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity;
 
-import com.teenthofabud.core.common.data.entity.TOABBaseEntity;
 import lombok.*;
 
 import javax.persistence.*;

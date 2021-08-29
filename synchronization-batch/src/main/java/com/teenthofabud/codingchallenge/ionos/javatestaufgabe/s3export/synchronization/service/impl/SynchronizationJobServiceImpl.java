@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,11 +28,11 @@ public class SynchronizationJobServiceImpl implements SynchronizationJobService,
     private JobLauncher jobLauncher;
     private Job synchronizationJob;
     private String jobParameterName1;
-    private Map<String, JobParameter> synchronizationJobParameterMap;
+    //private Map<String, JobParameter> synchronizationJobParameterMap;
     private SimpleDateFormat sdf;
     private String timestampFormat;
 
-    @Value("${s3export.sync.job.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
+    @Value("${s3export.sync.job.file.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
     public void setTimestampFormat(String timestampFormat) {
         this.timestampFormat = timestampFormat;
     }
@@ -53,24 +54,29 @@ public class SynchronizationJobServiceImpl implements SynchronizationJobService,
         this.synchronizationJob = synchronizationJob;
     }
 
-    @Scheduled(cron = "${s3export.sync.job.cron:0 */3 * * * *}", zone = "${s3export.sync.timezone:Europe/Paris}")
+    /**
+     * Run a new instance of this functionality's core job every configured amount of time as per the cron expression
+     * @throws SynchronizationException
+     */
+    @Scheduled(cron = "${s3export.sync.job.cron:0 */5 * * * ?}")
     public synchronized void runJob() throws SynchronizationException {
         try {
-                Long synchronizationJobStartTime = System.currentTimeMillis();
-                JobParameters synchronizationJobParameters =   new JobParametersBuilder()
-                            .addLong(jobParameterName1, synchronizationJobStartTime).toJobParameters();
-                log.info("Starting job with parameters: {}", synchronizationJobParameters);
-                JobExecution synchronizationJobExecution = jobLauncher.run(synchronizationJob, synchronizationJobParameters);
-                SynchronizationJobDetailVo vo = new SynchronizationJobDetailVo();
-                vo.setId(synchronizationJobExecution.getJobId());
-                vo.setExecutionId(synchronizationJobExecution.getId());
-                vo.setName(synchronizationJobExecution.getJobInstance().getJobName());
-                vo.setInstanceId(synchronizationJobExecution.getJobInstance().getInstanceId());
-                Date synchronizationJobStartDate = new Date();
-                synchronizationJobStartDate.setTime(synchronizationJobStartTime);
-                vo.setCreateTime(sdf.format(synchronizationJobStartDate));
-                vo.setStartTime(sdf.format(synchronizationJobExecution.getStartTime()));
-                vo.setStatus(synchronizationJobExecution.getStatus().getBatchStatus().name());
+            Instant synchronizationInstant = Instant.now();
+            Long synchronizationJobStartTime = synchronizationInstant.toEpochMilli();;
+            JobParameters synchronizationJobParameters =   new JobParametersBuilder()
+                .addLong(jobParameterName1, synchronizationJobStartTime).toJobParameters();
+            log.info("Starting job with parameters: {}", synchronizationJobParameters);
+            JobExecution synchronizationJobExecution = jobLauncher.run(synchronizationJob, synchronizationJobParameters);
+            SynchronizationJobDetailVo vo = new SynchronizationJobDetailVo();
+            vo.setId(synchronizationJobExecution.getJobId());
+            vo.setExecutionId(synchronizationJobExecution.getId());
+            vo.setName(synchronizationJobExecution.getJobInstance().getJobName());
+            vo.setInstanceId(synchronizationJobExecution.getJobInstance().getInstanceId());
+            Date synchronizationJobStartDate = new Date();
+            synchronizationJobStartDate.setTime(synchronizationJobStartTime);
+            vo.setCreateTime(sdf.format(synchronizationJobStartDate));
+            vo.setStartTime(sdf.format(synchronizationJobExecution.getStartTime()));
+            vo.setStatus(synchronizationJobExecution.getStatus().getBatchStatus().name());
         } catch (JobExecutionAlreadyRunningException e) {
             throw new SynchronizationException(e.getMessage());
         } catch (JobRestartException e) {
@@ -84,8 +90,8 @@ public class SynchronizationJobServiceImpl implements SynchronizationJobService,
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        synchronizationJobParameterMap = new HashMap<>();
-        synchronizationJobParameterMap.put(jobParameterName1, new JobParameter(new Date()));
+        //synchronizationJobParameterMap = new HashMap<>();
+        //synchronizationJobParameterMap.put(jobParameterName1, new JobParameter(new Date()));
         sdf = new SimpleDateFormat(timestampFormat);
     }
 }
