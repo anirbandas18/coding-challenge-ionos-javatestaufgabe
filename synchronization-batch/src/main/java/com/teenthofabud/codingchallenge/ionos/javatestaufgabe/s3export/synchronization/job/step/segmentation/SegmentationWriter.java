@@ -40,7 +40,6 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
     private String fileNameDelimitter;
     private String fileExtension;
     private MinioClient minioClient;
-    private String timeZone;
     private String storeBaseLocation;
     private String fileTimestampFormat;
     private String bucketTimestampFormat;
@@ -51,15 +50,22 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
     private String fileBucketCollectionKeyName;
     private String keyNameDelimitter;
     private String jobParameterName1;
+    private String bucketNamePrefix;
+    private String bucketNameDelimitter;
+
+    @Value("${s3export.sync.delimitter.bucket.name:-}")
+    public void setBucketNameDelimitter(String bucketNameDelimitter) {
+        this.bucketNameDelimitter = bucketNameDelimitter;
+    }
+
+    @Value("${s3export.sync.job.bucket.name.prefix}")
+    public void setBucketNamePrefix(String bucketNamePrefix) {
+        this.bucketNamePrefix = bucketNamePrefix;
+    }
 
     @Value("${s3export.sync.filebucketcollection.key.name:fileBucketCollectionKey}")
     public void setFileBucketCollectionKeyName(String fileBucketCollectionKeyName) {
         this.fileBucketCollectionKeyName = fileBucketCollectionKeyName;
-    }
-
-    @Value("${s3export.sync.job.file.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
-    public void setFileTimestampFormat(String fileTimestampFormat) {
-        this.fileTimestampFormat = fileTimestampFormat;
     }
 
     @Value("${s3export.sync.job.bucket.timestamp.format:YYYY-MM-dd}")
@@ -70,6 +76,11 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
     @Value("${s3export.sync.store.base.path}")
     public void setStoreBaseLocation(String storeBaseLocation) {
         this.storeBaseLocation = storeBaseLocation;
+    }
+
+    @Value("${s3export.sync.job.file.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
+    public void setFileTimestampFormat(String fileTimestampFormat) {
+        this.fileTimestampFormat = fileTimestampFormat;
     }
 
     @Value("${s3export.sync.delimitter.file.name:+}")
@@ -129,7 +140,7 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
         Date dt = new Date();
         dt.setTime(timestamp);
         String date = bucketSdf.format(dt);
-        String bucketName = String.join("-", country, date);
+        String bucketName = String.join(bucketNameDelimitter, bucketNamePrefix, country, date);
         return bucketName;
     }
 

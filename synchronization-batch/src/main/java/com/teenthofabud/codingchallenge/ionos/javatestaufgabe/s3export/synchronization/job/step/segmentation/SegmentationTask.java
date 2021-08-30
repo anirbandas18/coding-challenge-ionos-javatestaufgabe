@@ -15,30 +15,30 @@ import java.util.List;
 @Slf4j
 public class SegmentationTask implements Tasklet {
 
-    private SegmentationReader reader;
-    private SegmentationProcessor processor;
-    private SegmentationWriter writer;
+    private SegmentationReader segmentationReader;
+    private SegmentationProcessor segmentationProcessor;
+    private SegmentationWriter segmentationWriter;
 
     @Autowired
-    public void setReader(SegmentationReader reader) {
-        this.reader = reader;
+    public void setSegmentationReader(SegmentationReader segmentationReader) {
+        this.segmentationReader = segmentationReader;
     }
 
     @Autowired
-    public void setProcessor(SegmentationProcessor processor) {
-        this.processor = processor;
+    public void setSegmentationProcessor(SegmentationProcessor segmentationProcessor) {
+        this.segmentationProcessor = segmentationProcessor;
     }
 
     @Autowired
-    public void setWriter(SegmentationWriter writer) {
-        this.writer = writer;
+    public void setSegmentationWriter(SegmentationWriter segmentationWriter) {
+        this.segmentationWriter = segmentationWriter;
     }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        List<LandKundenDto> landKundenDtos = reader.read();
-        List<LandKundeAuftragCollectionVo> landKundeAuftragCollectionVos = processor.process(landKundenDtos);
-        writer.write(Arrays.asList(landKundeAuftragCollectionVos));
+        List<LandKundenDto> landKundenDtos = segmentationReader.read();
+        List<LandKundeAuftragCollectionVo> landKundeAuftragCollectionVos = segmentationProcessor.process(landKundenDtos);
+        segmentationWriter.write(Arrays.asList(landKundeAuftragCollectionVos));
         return RepeatStatus.FINISHED;
     }
 }

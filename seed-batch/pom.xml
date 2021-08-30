@@ -7,7 +7,6 @@
         <groupId>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export</groupId>
         <artifactId>s3export-tool</artifactId>
         <version>1.0.0-RELEASE</version>
-        <!--<relativePath/>-->
     </parent>
 
     <properties>
@@ -44,5 +43,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-batch</artifactId>
+       </dependency>
+    </dependencies>
 
 </project>

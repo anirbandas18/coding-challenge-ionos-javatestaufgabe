@@ -16,30 +16,30 @@ import java.util.List;
 @Slf4j
 public class FilteringTask implements Tasklet {
 
-    private FilteringReader reader;
-    private FilteringProcessor processor;
-    private FilteringWriter writer;
+    private FilteringReader filteringReader;
+    private FilteringProcessor filteringProcessor;
+    private FilteringWriter filteringWriter;
 
     @Autowired
-    public void setReader(FilteringReader reader) {
-        this.reader = reader;
+    public void setFilteringReader(FilteringReader filteringReader) {
+        this.filteringReader = filteringReader;
     }
 
     @Autowired
-    public void setProcessor(FilteringProcessor processor) {
-        this.processor = processor;
+    public void setFilteringProcessor(FilteringProcessor filteringProcessor) {
+        this.filteringProcessor = filteringProcessor;
     }
 
     @Autowired
-    public void setWriter(FilteringWriter writer) {
-        this.writer = writer;
+    public void setFilteringWriter(FilteringWriter filteringWriter) {
+        this.filteringWriter = filteringWriter;
     }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        List<AuftraegeEntity> auftraegeEntities =  reader.read();
-        List<AuftragKundeDto> auftragKundeDtos = processor.process(auftraegeEntities);
-        writer.write(Arrays.asList(auftragKundeDtos));
+        List<AuftraegeEntity> auftraegeEntities =  filteringReader.read();
+        List<AuftragKundeDto> auftragKundeDtos = filteringProcessor.process(auftraegeEntities);
+        filteringWriter.write(Arrays.asList(auftragKundeDtos));
         return RepeatStatus.FINISHED;
     }
 }

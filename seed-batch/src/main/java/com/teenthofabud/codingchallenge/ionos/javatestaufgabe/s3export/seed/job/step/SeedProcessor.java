@@ -140,7 +140,6 @@ public class SeedProcessor implements ItemProcessor<AuftraegeEntity, AuftraegeEn
         LocalDateTime localDateTime = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second);
         ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
         ZonedDateTime utcZoneDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of(timezone));
-        //LocalDateTime utcDateTime = utcZoneDateTime.toLocalDateTime();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(timestampFormat);
         String timestamp = utcZoneDateTime.format(dtf);
         return timestamp;

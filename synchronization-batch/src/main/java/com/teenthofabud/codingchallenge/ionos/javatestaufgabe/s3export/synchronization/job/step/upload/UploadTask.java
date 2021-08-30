@@ -14,30 +14,30 @@ import java.util.List;
 @Slf4j
 public class UploadTask implements Tasklet {
 
-    private UploadReader reader;
-    private UploadProcessor processor;
-    private UploadWriter writer;
+    private UploadReader uploadReader;
+    private UploadProcessor uploadProcessor;
+    private UploadWriter uploadWriter;
 
     @Autowired
-    public void setReader(UploadReader reader) {
-        this.reader = reader;
+    public void setUploadReader(UploadReader uploadReader) {
+        this.uploadReader = uploadReader;
     }
 
     @Autowired
-    public void setProcessor(UploadProcessor processor) {
-        this.processor = processor;
+    public void setUploadProcessor(UploadProcessor uploadProcessor) {
+        this.uploadProcessor = uploadProcessor;
     }
 
     @Autowired
-    public void setWriter(UploadWriter writer) {
-        this.writer = writer;
+    public void setUploadWriter(UploadWriter uploadWriter) {
+        this.uploadWriter = uploadWriter;
     }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        List<FileBucketDto> fileBucketMap = reader.read();
-        fileBucketMap = processor.process(fileBucketMap);
-        writer.write(Arrays.asList(fileBucketMap));
+        List<FileBucketDto> fileBucketMap = uploadReader.read();
+        fileBucketMap = uploadProcessor.process(fileBucketMap);
+        uploadWriter.write(Arrays.asList(fileBucketMap));
         return RepeatStatus.FINISHED;
     }
 }

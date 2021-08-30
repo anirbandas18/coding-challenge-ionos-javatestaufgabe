@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -68,23 +69,23 @@ public class UploadWriter implements ItemWriter<List<FileBucketDto>> {
         List<FileBucketDto> fileBucketDtoList = items.get(0);
         Map<String,Integer> uploadMetrics = new TreeMap<>();
         for(FileBucketDto fileBucketDto : fileBucketDtoList) {
-            String fileLocation = fileBucketDto.getFileLocation();
-            if(Files.exists(Paths.get(fileLocation))) {
-                log.debug("File: {} exists at its concerned location", fileLocation);
+            Path filePath = Paths.get(fileBucketDto.getFileLocation());
+            if(Files.exists(filePath)) {
+                log.debug("File: {} exists at its concerned location", filePath.toString());
                 ObjectWriteResponse response = minioClient.uploadObject(
                         UploadObjectArgs.builder()
                                 .bucket(fileBucketDto.getBucketName())
                                 .object(fileBucketDto.getFileName())
                                 .contentType(MediaType.CSV_UTF_8.type())
-                                //.region("")
-                                //.retention(retention)
-                                .filename(fileLocation)
+                                .filename(filePath.toString())
                                 .build());
-                log.info("Uploaded file: {} to bucket: {}", fileBucketDto.getFileName(), fileBucketDto.getBucketName());
+                log.info("Uploaded file: {} to bucket: {} from: {}", fileBucketDto.getFileName(), fileBucketDto.getBucketName(), filePath.toString());
+                Files.delete(filePath);
+                log.debug("Deleted file {} post upload", filePath.toString());
                 int count = uploadMetrics.containsKey(fileBucketDto.getBucketName()) ? uploadMetrics.get(fileBucketDto.getBucketName()) : 0;
                 uploadMetrics.put(fileBucketDto.getBucketName(), ++count);
             } else {
-                log.debug("File: {} does not exist at its concerned location", fileLocation);
+                log.debug("File: {} does not exist at its concerned location", filePath.toString());
             }
         };
         for(String country : uploadMetrics.keySet()) {

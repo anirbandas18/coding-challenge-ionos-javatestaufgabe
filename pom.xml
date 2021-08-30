@@ -16,7 +16,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>partner-service</module>
+        <module>download-service</module>
         <module>synchronization-batch</module>
         <module>seed-batch</module>
     </modules>
@@ -41,14 +41,12 @@
         <opencsv.version>5.5.1</opencsv.version>
         <minio.version>8.3.0</minio.version>
         <okhttp3.version>4.8.1</okhttp3.version>
-        <spring-batch-test.version>4.3.3</spring-batch-test.version>
+        <spring-batch-test.verclearsion>4.3.3</spring-batch-test.verclearsion>
+        <embedded-redis.version>0.7.3</embedded-redis.version>
+        <tika-core.version>2.1.0</tika-core.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-batch</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -60,11 +58,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>${springdoc.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -117,11 +110,6 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
-        <!--<dependency>
-            <groupId>com.teenthofabud.core.common</groupId>
-            <artifactId>toab-chassis-sdk</artifactId>
-            <version>${toab-chassis-sdk.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>

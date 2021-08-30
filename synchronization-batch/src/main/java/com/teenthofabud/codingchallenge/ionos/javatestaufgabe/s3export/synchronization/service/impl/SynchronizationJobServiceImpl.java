@@ -28,7 +28,6 @@ public class SynchronizationJobServiceImpl implements SynchronizationJobService,
     private JobLauncher jobLauncher;
     private Job synchronizationJob;
     private String jobParameterName1;
-    //private Map<String, JobParameter> synchronizationJobParameterMap;
     private SimpleDateFormat sdf;
     private String timestampFormat;
 
@@ -42,7 +41,6 @@ public class SynchronizationJobServiceImpl implements SynchronizationJobService,
     public void setJobParameterName1(String jobParameterName1) {
         this.jobParameterName1 = jobParameterName1;
     }
-
 
     @Autowired
     public void setJobLauncher(JobLauncher jobLauncher) {
@@ -90,8 +88,6 @@ public class SynchronizationJobServiceImpl implements SynchronizationJobService,
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        //synchronizationJobParameterMap = new HashMap<>();
-        //synchronizationJobParameterMap.put(jobParameterName1, new JobParameter(new Date()));
         sdf = new SimpleDateFormat(timestampFormat);
     }
 }

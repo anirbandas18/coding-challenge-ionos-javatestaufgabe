@@ -7,7 +7,6 @@
         <groupId>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export</groupId>
         <artifactId>s3export-tool</artifactId>
         <version>1.0.0-RELEASE</version>
-        <!--<relativePath/>-->
     </parent>
 
     <properties>
@@ -48,6 +47,10 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-batch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
@@ -58,6 +61,12 @@
         <dependency>
             <groupId>org.springframework.batch</groupId>
             <artifactId>spring-batch-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.ozimov</groupId>
+            <artifactId>embedded-redis</artifactId>
+            <version>${embedded-redis.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -15,30 +15,30 @@ import java.util.List;
 @Slf4j
 public class MappingTask implements Tasklet {
 
-    private MappingReader reader;
-    private MappingProcessor processor;
-    private MappingWriter writer;
+    private MappingReader mappingreader;
+    private MappingProcessor mappingProcessor;
+    private MappingWriter mappingWriter;
 
     @Autowired
-    public void setReader(MappingReader reader) {
-        this.reader = reader;
+    public void setMappingreader(MappingReader mappingreader) {
+        this.mappingreader = mappingreader;
     }
 
     @Autowired
-    public void setProcessor(MappingProcessor processor) {
-        this.processor = processor;
+    public void setMappingProcessor(MappingProcessor mappingProcessor) {
+        this.mappingProcessor = mappingProcessor;
     }
 
     @Autowired
-    public void setWriter(MappingWriter writer) {
-        this.writer = writer;
+    public void setMappingWriter(MappingWriter mappingWriter) {
+        this.mappingWriter = mappingWriter;
     }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        List<AuftragKundeDto> auftragKundeDtos = reader.read();
-        List<KundeAuftragDto> kundeAuftragDtos = processor.process(auftragKundeDtos);
-        writer.write(Arrays.asList(kundeAuftragDtos));
+        List<AuftragKundeDto> auftragKundeDtos = mappingreader.read();
+        List<KundeAuftragDto> kundeAuftragDtos = mappingProcessor.process(auftragKundeDtos);
+        mappingWriter.write(Arrays.asList(kundeAuftragDtos));
         return RepeatStatus.FINISHED;
     }
 }

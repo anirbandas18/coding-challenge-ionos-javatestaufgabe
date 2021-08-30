@@ -1,3 +1,0 @@
-USE S3EXPORT_SYNC_DB;
-
-
