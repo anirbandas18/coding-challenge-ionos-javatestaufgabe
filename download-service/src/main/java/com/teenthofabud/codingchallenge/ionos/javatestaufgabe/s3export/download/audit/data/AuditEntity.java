@@ -24,5 +24,9 @@ public class AuditEntity extends TOABBaseEntity {
     private String action;
     @ToString.Include
     private String description;
+    @ToString.Include
+    private String input;
+    @ToString.Include
+    private String output;
 
 }

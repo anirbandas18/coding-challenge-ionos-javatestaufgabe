@@ -1,10 +1,9 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.filtering;
 
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.AuftragKundeDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.AuftraegeEntity;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.data.AuftraegeModelVo;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.AuftragKundeDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -37,8 +36,8 @@ public class FilteringTask implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        List<AuftraegeEntity> auftraegeEntities =  filteringReader.read();
-        List<AuftragKundeDto> auftragKundeDtos = filteringProcessor.process(auftraegeEntities);
+        List<AuftraegeModelVo> auftraegemodelVos =  filteringReader.read();
+        List<AuftragKundeDto> auftragKundeDtos = filteringProcessor.process(auftraegemodelVos);
         filteringWriter.write(Arrays.asList(auftragKundeDtos));
         return RepeatStatus.FINISHED;
     }

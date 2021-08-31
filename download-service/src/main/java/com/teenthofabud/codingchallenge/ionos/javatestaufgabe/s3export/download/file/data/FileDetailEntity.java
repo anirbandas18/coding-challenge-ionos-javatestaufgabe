@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,6 +18,6 @@ public class FileDetailEntity {
     @ToString.Include
     private String country;
     @ToString.Include
-    private LocalDate date;
+    private LocalDateTime dateTime;
 
 }

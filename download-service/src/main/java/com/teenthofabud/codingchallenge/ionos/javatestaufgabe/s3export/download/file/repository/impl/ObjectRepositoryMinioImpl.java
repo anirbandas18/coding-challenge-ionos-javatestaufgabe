@@ -22,9 +22,8 @@ import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
@@ -34,22 +33,15 @@ public class ObjectRepositoryMinioImpl implements FileRepository, InitializingBe
     private static final String FILE_EXTENSION_DELIMITTER = ".";
     private static final Comparator<FileDetailEntity> CMP_BY_COUNTRY_ASC_DATE_DESC = (s1, s2) -> {
         return Integer.compare(s1.getCountry().compareTo(s2.getCountry()),
-                s2.getDate().compareTo(s1.getDate()));
+                s2.getDateTime().compareTo(s1.getDateTime()));
     };
 
-    private SimpleDateFormat fileSdf;
+    private DateTimeFormatter fileDtf;
 
     private String fileTimestampFormat;
     private String fileNameDelimitter;
-    private String fileExtension;
-    private String timeZone;
 
-    @Value("${s3export.download.timezone:Europe/Paris}")
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
-    }
-
-    @Value("${s3export.download.job.file.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
+    @Value("${s3export.download.job.file.timestamp.format:yyyy-MM-dd'_'HH-mm-ss}")
     public void setFileTimestampFormat(String fileTimestampFormat) {
         this.fileTimestampFormat = fileTimestampFormat;
     }
@@ -59,12 +51,6 @@ public class ObjectRepositoryMinioImpl implements FileRepository, InitializingBe
         this.fileNameDelimitter = fileNameDelimitter;
     }
 
-    @Value("${s3export.download.export.file.extension:csv}")
-    public void setFileExtension(String fileExtension) {
-        this.fileExtension = fileExtension;
-    }
-
-
     private MinioClient minioClient;
 
     @Autowired
@@ -73,18 +59,18 @@ public class ObjectRepositoryMinioImpl implements FileRepository, InitializingBe
     }
 
     private FileDetailEntity parseObjectName(String objectName) throws FileException, ParseException {
-        String tkns[] = objectName.split("\\\\" + FILE_EXTENSION_DELIMITTER);
+        String tkns[] = objectName.split("\\" + FILE_EXTENSION_DELIMITTER);
         if(tkns == null || tkns.length == 0) {
             throw new FileException(DownloadErrorCode.DOWNLOAD_ACTION_FAILURE,
                     "invalid object name with extension", new Object[] { "object name", objectName });
         }
+
         tkns = tkns[0].split("\\" + fileNameDelimitter);
-        Date date = fileSdf.parse(tkns[1]);
-        LocalDate localDate = date.toInstant().atZone(ZoneId.of(timeZone)).toLocalDate();
+        LocalDateTime localDateTime = LocalDateTime.parse(tkns[1], fileDtf);
         FileDetailEntity fileDetailEntity = new FileDetailEntity();
         fileDetailEntity.setName(objectName);
         fileDetailEntity.setCountry(tkns[0]);
-        fileDetailEntity.setDate(localDate);
+        fileDetailEntity.setDateTime(localDateTime);
         return fileDetailEntity;
     }
 
@@ -135,6 +121,6 @@ public class ObjectRepositoryMinioImpl implements FileRepository, InitializingBe
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        fileSdf = new SimpleDateFormat(fileTimestampFormat);
+        fileDtf = DateTimeFormatter.ofPattern(fileTimestampFormat);
     }
 }

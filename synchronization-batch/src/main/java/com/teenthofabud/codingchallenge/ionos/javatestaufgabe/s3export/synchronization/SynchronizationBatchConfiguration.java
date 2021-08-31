@@ -1,11 +1,11 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization;
 
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.AuftragKundeDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.FileBucketDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.LandKundenDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.AuftraegeEntity;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.vo.LandKundeAuftragCollectionVo;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.data.AuftraegeModelVo;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.AuftragKundeDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.FileBucketDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.KundeAuftragDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.LandKundenDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.vo.LandKundeAuftragCollectionVo;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.listener.TOABItemFailureListener;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.listener.TOABNoWorkFoundStepExecutionListener;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.filtering.FilteringProcessor;
@@ -24,50 +24,47 @@ import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchroni
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.upload.UploadReader;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.upload.UploadTask;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.upload.UploadWriter;
+import com.teenthofabud.core.common.factory.TOABFeignErrorDecoderFactory;
+import feign.codec.ErrorDecoder;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.*;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Configuration
+@EnableFeignClients(basePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.proxy",
+        "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.proxy"})
+@EnableEurekaClient
 @EnableBatchProcessing
-@EnableRedisRepositories(basePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.redis" })
+@EnableRedisRepositories(basePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.repository" })
 @EnableScheduling
-@EnableJpaRepositories(basePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.jpa" })
 @Slf4j
-public class SynchronizationBatchConfiguration implements InitializingBean {
+public class SynchronizationBatchConfiguration {
 
     private String auftragKundeCollectionKeyName;
     private String kundeAuftragCollectionKeyName;
-    private Integer batchSize;
     private String bucketBaseUrl;
     private String bucketAccessKey;
     private String bucketSecretKey;
-    private String storageBaseLocation;
     private String appName;
     private StepBuilderFactory stepBuilderFactory;
     private JobBuilderFactory jobBuilderFactory;
     private String fileBucketCollectionKeyName;
+    private ApplicationContext applicationContext;
 
-    @Value("${s3export.sync.store.base.path}")
-    public void setStorageBaseLocation(String storageBaseLocation) {
-        this.storageBaseLocation = storageBaseLocation;
-    }
 
     @Value("${s3export.sync.bucket.base.url:https://play.min.io}")
     public void setBucketBaseUrl(String bucketBaseUrl) {
@@ -82,11 +79,6 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
     @Value("${s3export.sync.bucket.secret.key:zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG}")
     public void setBucketSecretKey(String bucketSecretKey) {
         this.bucketSecretKey = bucketSecretKey;
-    }
-
-    @Value("${s3export.sync.batch.size:1000}")
-    public void setBatchSize(Integer batchSize) {
-        this.batchSize = batchSize;
     }
 
     @Value("${s3export.sync.auftragkundecollection.key.name:auftragKundeCollectionKey}")
@@ -139,13 +131,6 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
         return minioClient;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Path storageAbsolutePath = Paths.get(storageBaseLocation);
-        Files.createDirectories(storageAbsolutePath);
-        log.info("Creating all directories if not present within the absolute path: {}", storageAbsolutePath);
-    }
-
     @Bean
     @StepScope
     public FilteringReader filteringReader() {
@@ -175,7 +160,7 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
         return stepBuilderFactory.get("filtering")
                 .tasklet(filteringTask())
                 .listener(new TOABNoWorkFoundStepExecutionListener())
-                .listener(new TOABItemFailureListener<List<AuftraegeEntity>, List<KundeAuftragDto>>())
+                .listener(new TOABItemFailureListener<List<AuftraegeModelVo>, List<KundeAuftragDto>>())
                 .listener(promotionListener())
                 .listener(filteringWriter())
                 .build();
@@ -297,6 +282,18 @@ public class SynchronizationBatchConfiguration implements InitializingBean {
                 .next(segmentation())
                 .next(upload())
                 .build();
+    }
+
+    @Autowired
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    @Bean
+    public ErrorDecoder errorDecoder() {
+        String[] feignBasePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.proxy",
+                "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.proxy" };
+        return new TOABFeignErrorDecoderFactory(applicationContext, feignBasePackages);
     }
 
 }

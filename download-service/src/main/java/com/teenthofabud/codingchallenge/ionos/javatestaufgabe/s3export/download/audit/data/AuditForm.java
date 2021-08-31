@@ -15,5 +15,11 @@ public class AuditForm {
     private String action;
     @ToString.Include
     private String description;
+    @ToString.Include
+    private String input;
+    @ToString.Include
+    private String output;
+    @ToString.Include
+    private Long userSequence;
 
 }

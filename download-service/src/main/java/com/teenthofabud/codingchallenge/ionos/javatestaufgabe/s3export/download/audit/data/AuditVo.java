@@ -20,6 +20,10 @@ public class AuditVo implements Comparable<AuditVo> {
     @ToString.Include
     private String description;
     @ToString.Include
+    private String input;
+    @ToString.Include
+    private String output;
+    @ToString.Include
     private String createdAt;
     @ToString.Include
     private String createdBy;

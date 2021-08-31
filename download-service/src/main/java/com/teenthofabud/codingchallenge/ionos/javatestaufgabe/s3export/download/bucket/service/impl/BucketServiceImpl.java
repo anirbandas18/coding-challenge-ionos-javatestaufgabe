@@ -28,23 +28,11 @@ public class BucketServiceImpl implements BucketService, InitializingBean {
 
     private DateTimeFormatter dtf;
 
-    private String bucketNamePrefix;
-    private String bucketNameDelimitter;
     private String bucketTimestampFormat;
 
     @Value("${s3export.download.job.bucket.timestamp.format:yyyy-MM-dd}")
     public void setBucketTimestampFormat(String bucketTimestampFormat) {
         this.bucketTimestampFormat = bucketTimestampFormat;
-    }
-
-    @Value("${s3export.download.job.bucket.name.prefix:s3export-synchronization-batch}")
-    public void setBucketNamePrefix(String bucketNamePrefix) {
-        this.bucketNamePrefix = bucketNamePrefix;
-    }
-
-    @Value("${s3export.download.delimitter.bucket.name:_}")
-    public void setBucketNameDelimitter(String bucketNameDelimitter) {
-        this.bucketNameDelimitter = bucketNameDelimitter;
     }
 
     @Autowired
@@ -66,6 +54,17 @@ public class BucketServiceImpl implements BucketService, InitializingBean {
         }
         log.info("Total buckets available: {}", bucketVos.size());
         return new LinkedHashSet<>(bucketVos);
+    }
+
+    @Override
+    public Set<String> retrieveAllCountries() throws BucketException {
+        Set<String> countryNames = new HashSet<>();
+        List<BucketEntity> bucketEntities = repository.findAll();
+        if(!bucketEntities.isEmpty()) {
+            countryNames = bucketEntities.stream().map(b -> b.getCountry()).collect(Collectors.toSet());
+        }
+        log.info("Unique countries available: {}", countryNames.size());
+        return new TreeSet<>(countryNames);
     }
 
     @Override
@@ -135,8 +134,16 @@ public class BucketServiceImpl implements BucketService, InitializingBean {
 
     @Override
     public BucketVo retrieveForCountryOnDate(String country, String date) throws BucketException {
-        throw new BucketException(DownloadErrorCode.DOWNLOAD_ACTION_FAILURE, "not implemented",
-                new Object[] { "functionality not available" });
+        List<BucketEntity> filteredBuckets = searchByCountry(country);
+        LocalDate localDate = LocalDate.parse(date, dtf);
+        Optional<BucketEntity> optionalBucketEntity = filteredBuckets.stream().filter(b -> b.getDate().isEqual(localDate)).findFirst();
+        if(optionalBucketEntity.isEmpty()) {
+            log.error("No buckets available for country {} on date {}", country, date);
+            throw new BucketException(DownloadErrorCode.DOWNLOAD_NOT_FOUND, new Object[] { "country: " + country, "date: " + date });
+        }
+        BucketVo bucketVo = entity2VoConverter.convert(optionalBucketEntity.get());
+        log.info("Retrieved {} as latest bucket for country {} on date {}", bucketVo, country, date);
+        return bucketVo;
     }
 
     @Override

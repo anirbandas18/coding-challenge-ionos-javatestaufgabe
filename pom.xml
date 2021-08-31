@@ -11,7 +11,7 @@
 
     <groupId>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export</groupId>
     <artifactId>s3export-tool</artifactId>
-    <version>1.0.0-RELEASE</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>s3export-tool</name>
     <packaging>pom</packaging>
 
@@ -19,6 +19,8 @@
         <module>download-service</module>
         <module>synchronization-batch</module>
         <module>seed-batch</module>
+        <module>auftraege-service</module>
+        <module>kunde-service</module>
     </modules>
 
     <properties>
@@ -28,7 +30,7 @@
         <sonar.organization>teenthofabud</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
-        <toab-chassis-sdk.version>0.0.1-SNAPSHOT</toab-chassis-sdk.version>
+        <toab-chassis-sdk.version>1.1.0-SNAPSHOT</toab-chassis-sdk.version>
         <json-patch.version>1.13</json-patch.version>
         <jackson-datatype-jdk8.version>2.12.3</jackson-datatype-jdk8.version>
         <javax.json-api.version>1.1.4</javax.json-api.version>
@@ -44,6 +46,7 @@
         <spring-batch-test.verclearsion>4.3.3</spring-batch-test.verclearsion>
         <embedded-redis.version>0.7.3</embedded-redis.version>
         <tika-core.version>2.1.0</tika-core.version>
+        <javafaker.version>1.0.2</javafaker.version>
     </properties>
 
     <dependencies>
@@ -116,6 +119,11 @@
             <version>${logstash-logback-encoder.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.teenthofabud.core.common</groupId>
+            <artifactId>toab-chassis-sdk</artifactId>
+            <version>${toab-chassis-sdk.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -127,6 +135,18 @@
             </exclusions>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

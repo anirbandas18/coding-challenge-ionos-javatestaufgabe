@@ -17,38 +17,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
 @Slf4j
-public class FileServiceImpl implements FileService {
+public class FileServiceImpl implements FileService, InitializingBean {
 
     private FileRepository repository;
     private FileEntity2VoConverter entity2VoConverter;
     private BucketService service;
 
-    //private DateTimeFormatter dtf;
-    //private SimpleDateFormat bucketSdf;
-
-    private String bucketNamePrefix;
-    private String bucketNameDelimitter;
     private String bucketTimestampFormat;
+
+    private DateTimeFormatter dtf;
 
     @Value("${s3export.download.job.bucket.timestamp.format:yyyy-MM-dd}")
     public void setBucketTimestampFormat(String bucketTimestampFormat) {
         this.bucketTimestampFormat = bucketTimestampFormat;
-    }
-
-    @Value("${s3export.download.job.bucket.name.prefix:s3export-synchronization-batch}")
-    public void setBucketNamePrefix(String bucketNamePrefix) {
-        this.bucketNamePrefix = bucketNamePrefix;
-    }
-
-    @Value("${s3export.download.delimitter.bucket.name:_}")
-    public void setBucketNameDelimitter(String bucketNameDelimitter) {
-        this.bucketNameDelimitter = bucketNameDelimitter;
     }
 
     @Autowired
@@ -66,74 +53,28 @@ public class FileServiceImpl implements FileService {
         this.service = service;
     }
 
-    /*@Override
-    public Set<FileVo> retrieveAllByNaturalOrdering() throws FileException {
-        List<FileVo> fileVos = new LinkedList<>();
-        List<FileEntity> bucketEntities = repository.findAll();
-        if(!bucketEntities.isEmpty()) {
-            fileVos = bucketEntities.stream().map(b -> entity2VoConverter.convert(b)).collect(Collectors.toList());
-        }
-        log.info("Total buckets available: {}", fileVos.size());
-        return new LinkedHashSet<>(fileVos);
-    }
-
-    @Override
-    public FileVo retrieveByName(String name) throws FileException {
-        Optional<FileEntity> bucketEntity = Optional.empty();
-        List<FileEntity> bucketEntities = repository.findAll();
-        if(!bucketEntities.isEmpty()) {
-            bucketEntity = bucketEntities.stream().filter(b -> b.getName().equalsIgnoreCase(name)).findAny();
-        }
-        if(bucketEntity.isEmpty()) {
-            log.error("No bucket available with name: {}", name);
-            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND, new Object[] { "name", name });
-        }
-        FileVo fileVo = entity2VoConverter.convert(bucketEntity.get());
-        log.info("Bucket available with name {}", fileVo.getName());
-        return fileVo;
-    }
-
-    @Override
-    public List<FileVo> retrieveAllForCountry(String country) throws FileException {
-        List<FileVo> fileVos = new LinkedList<>();
-        List<FileEntity> filteredBuckets = searchByCountry(country);
-        if(filteredBuckets.isEmpty()) {
-            log.error("No buckets available for country {}", country);
-            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND, new Object[] { "country", country });
-        }
-        fileVos = filteredBuckets.stream().map(b -> entity2VoConverter.convert(b)).collect(Collectors.toList());
-        log.info("Retrieved {} buckets matching country {}", fileVos.size(), country);
-        return fileVos;
-
-    }
-
-    @Override
-    public List<FileVo> retrieveAllForDate(String date) throws FileException {
-        List<FileVo> fileVos = new LinkedList<>();
-        LocalDate localDate = LocalDate.now();
-        try {
-            localDate = LocalDate.parse(date, dtf);
-        } catch (DateTimeParseException e) {
-            throw new FileException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "date", date});
-        }
-        final LocalDate timestamp = localDate;
-        List<FileEntity> bucketList = repository.findAll();
-        List<FileEntity> filteredBuckets = bucketList.stream()
-                .filter(b -> b.getDate().isEqual(timestamp)).collect(Collectors.toList());
-        if(filteredBuckets.isEmpty()) {
-            log.error("No buckets available on date {}", timestamp);
-            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND, new Object[] { "date", timestamp });
-        }
-        fileVos = filteredBuckets.stream().map(b -> entity2VoConverter.convert(b)).collect(Collectors.toList());
-        log.info("Retrieved {} buckets matching with date {}", fileVos.size(), timestamp);
-        return fileVos;
-    }*/
-
-
     @Override
     public FileVo retrieveBy(String country, String date, String name) throws FileException {
-        throw new FileException(DownloadErrorCode.DOWNLOAD_ACTION_FAILURE, "not implemented",
-                new Object[] { "functionality not available" });
+        BucketVo bucketForCountryOnDate = null;
+        try {
+            bucketForCountryOnDate = service.retrieveForCountryOnDate(country, date);
+        } catch (BucketException e) {
+            log.error("No file available for country on the given date", e);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND,
+                    "No file available for country on the given date", new Object [] { "country: " + country, "date: " + date });
+        }
+        String bucketName = bucketForCountryOnDate.getName();
+        log.info("Bucket available for country {} on date {} as {}", country, date, bucketName);
+
+        Optional<FileEntity> fileEntityOptional = repository.findContentBy(bucketName, name);
+        if(fileEntityOptional.isEmpty()) {
+            log.error("No file content available for country {} on date {}", country, date);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND,
+                    "no file content available for country on the given date", new Object [] { "country: " + country, "date: " + date });
+        }
+        FileVo fileVo = entity2VoConverter.convert(fileEntityOptional.get());
+        log.info("Retrieved file reference of size {} for the file of country {} on date {}", fileVo.getContent().length, country, date);
+        return fileVo;
     }
 
     @Override
@@ -165,50 +106,40 @@ public class FileServiceImpl implements FileService {
 
 
     @Override
-    public FileVo retrieveBy(String country, String timestamp) throws FileException {
-        throw new FileException(DownloadErrorCode.DOWNLOAD_ACTION_FAILURE, "not implemented",
-                new Object[] { "functionality not available" });
+    public FileVo retrieveBy(String country, String date) throws FileException {
+        BucketVo bucketForCountryOnDate = null;
+        try {
+            bucketForCountryOnDate = service.retrieveForCountryOnDate(country, date);
+        } catch (BucketException e) {
+            log.error("No file available for country on the given date", e);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND,
+                    "No file available for country on the given date", new Object [] { "country: " + country, "date: " + date });
+        }
+        String bucketName = bucketForCountryOnDate.getName();
+        log.info("Bucket available for country {} on date {} as {}", country, date, bucketName);
+        List<FileDetailEntity> fileDetailEntities = repository.findAllReferencesBy(bucketForCountryOnDate.getName());
+        LocalDateTime localDateTime = LocalDateTime.parse(date, dtf);
+        Optional<FileDetailEntity> optionalFileDetailEntity = fileDetailEntities.stream().filter(f -> f.getDateTime().isEqual(localDateTime)).findFirst();
+        if(optionalFileDetailEntity.isEmpty()) {
+            log.error("No file reference available for country {} on date {}", country, date);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND,
+                    "no file reference available for country on the given date", new Object [] { "country: " + country, "date: " + date });
+        }
+        FileDetailEntity fileDetailEntity = optionalFileDetailEntity.get();
+        log.info("File details available for country {} on date {} as {}", country, date, fileDetailEntity.getName());
+        Optional<FileEntity> fileEntityOptional = repository.findContentBy(bucketName, fileDetailEntity.getName());
+        if(fileEntityOptional.isEmpty()) {
+            log.error("No file content available for country {} on date {}", country, date);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND,
+                    "no file content available for country on the given date", new Object [] { "country: " + country, "date: " + date });
+        }
+        FileVo fileVo = entity2VoConverter.convert(fileEntityOptional.get());
+        log.info("Retrieved file reference of size {} for the file of country {} on date {}", fileVo.getContent().length, country, date);
+        return fileVo;
     }
 
-    /*@Override
-    public FileVo retrieveLatestForCountry(String country) throws FileException {
-        List<FileEntity> filteredBuckets = searchByCountry(country);
-        if(filteredBuckets.isEmpty()) {
-            log.error("No buckets available for country {}", country);
-            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND, new Object[] { "country", country });
-        }
-        FileEntity fileEntity = filteredBuckets.get(filteredBuckets.size() - 1);
-        FileVo fileVo = entity2VoConverter.convert(fileEntity);
-        log.info("Retrieved {} as latest bucket for country {}", fileVo, country);
-        return fileVo;
-    }*/
-
-    /*@Override
-    public FileVo retrieveForCountryOnDate(String country, String date) throws FileException {
-        throw new FileException(DownloadErrorCode.DOWNLOAD_ACTION_FAILURE, "not implemented",
-                new Object[] { "functionality not available" });
-    }*/
-
-    /*@Override
+    @Override
     public void afterPropertiesSet() throws Exception {
         dtf = DateTimeFormatter.ofPattern(bucketTimestampFormat);
-        bucketSdf = new SimpleDateFormat(bucketTimestampFormat);
-    }*/
-
-    /*private List<FileEntity> searchByCountry(String country) throws FileException {
-        String bucketNamePattern = String.join(bucketNameDelimitter, bucketNamePrefix, country);
-        List<FileEntity> bucketList = repository.fi
-        List<FileEntity> filteredBuckets = bucketList.stream()
-                .filter(b -> b.getCountry().startsWith(bucketNamePattern)).collect(Collectors.toList());
-        return filteredBuckets;
-    }*/
-
-    /*private String getBucketName(String country, Long timestamp) {
-        Date dt = new Date();
-        dt.setTime(timestamp);
-        String date = bucketSdf.format(dt);
-        String bucketName = String.join(bucketNameDelimitter, bucketNamePrefix, country, date);
-        return bucketName;
-    }*/
-
+    }
 }

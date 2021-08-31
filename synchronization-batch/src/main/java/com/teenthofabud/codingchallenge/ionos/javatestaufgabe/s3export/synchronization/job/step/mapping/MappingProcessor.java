@@ -1,9 +1,9 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.mapping;
 
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.AuftragKundeDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.KundeEntity;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.jpa.KundeRepository;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.data.KundeModelVo;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.proxy.KundeServiceClient;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.AuftragKundeDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.KundeAuftragDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,29 +14,28 @@ import java.util.List;
 @Slf4j
 public class MappingProcessor implements ItemProcessor<List<AuftragKundeDto>, List<KundeAuftragDto>> {
 
-    private KundeRepository entityRepository;
+    private KundeServiceClient client;
 
     @Autowired
-    public void setEntityRepository(KundeRepository entityRepository) {
-        this.entityRepository = entityRepository;
+    public void setClient(KundeServiceClient client) {
+        this.client = client;
     }
-
 
     private KundeAuftragDto convert(AuftragKundeDto item) throws Exception {
         KundeAuftragDto dto = new KundeAuftragDto();
-        KundeEntity ke = entityRepository.findByKundenId(item.getKundeId());
-        dto.setFirma(ke.getFirmenName());
-        dto.setLand(ke.getLand());
-        dto.setNachName(ke.getNachName());
-        dto.setVorName(ke.getVorName());
-        dto.setPlz(ke.getPlz());
-        dto.setOrt(ke.getOrt());
-        dto.setStrasse(ke.getStrasse());
-        dto.setStrassenZuSatz(ke.getStrassenZuSatz());
-        dto.setKundeId(String.valueOf(ke.getKundenId()));
+        KundeModelVo vo = client.getKundeModelDetailsByKundenId(item.getKundeId().toString());
+        dto.setFirma(vo.getFirmenName());
+        dto.setLand(vo.getLand());
+        dto.setNachName(vo.getNachName());
+        dto.setVorName(vo.getVorName());
+        dto.setPlz(vo.getPlz());
+        dto.setOrt(vo.getOrt());
+        dto.setStrasse(vo.getStrasse());
+        dto.setStrassenZuSatz(vo.getStrassenZuSatz());
+        dto.setKundeId(String.valueOf(vo.getKundenId()));
         dto.setArtikelNummer(item.getArtikelNummer());
         dto.setAuftragId(item.getAuftragId());
-        log.debug("Converted {} to {}", item, dto);
+        log.debug("Converted {} to {} via {}", item, dto, vo);
         return dto;
     }
 

@@ -21,7 +21,7 @@ public enum DownloadErrorCode implements TOABError {
 
     @Override
     public String toString() {
-        return "AccessErrorCode{" +
+        return "DownloadErrorCode{" +
                 this.name() + " -> " +
                 "errorCode='" + errorCode + '\'' +
                 ", httpStatusCode=" + httpStatusCode +

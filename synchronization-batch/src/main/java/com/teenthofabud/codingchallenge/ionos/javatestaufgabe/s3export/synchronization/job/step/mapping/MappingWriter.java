@@ -1,8 +1,8 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.mapping;
 
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragCollectionDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.KundeAuftragDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.redis.KundeAuftragCollectionRepository;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.KundeAuftragCollectionDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.KundeAuftragDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.repository.KundeAuftragCollectionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
@@ -21,13 +21,8 @@ import java.util.Map;
 @Slf4j
 public class MappingWriter implements ItemWriter<List<KundeAuftragDto>> {
 
-    private static final String FILE_NAME_DELIMITTER = "+";
-    private static final String FILE_EXTENSION_DELIMITTER = ".";
-
     private StepExecution stepExecution;
     private String jobParameterName1;
-    private String timestampFormat;
-    private String fileExtension;
     private String kundeAuftragCollectionKeyName;
     private String keyNameDelimitter;
     private KundeAuftragCollectionRepository repository;
@@ -45,16 +40,6 @@ public class MappingWriter implements ItemWriter<List<KundeAuftragDto>> {
     @Value("${s3export.sync.kundeauftragcollection.key.name:kundeAuftragCollectionKey}")
     public void setKundeAuftragCollectionKeyName(String kundeAuftragCollectionKeyName) {
         this.kundeAuftragCollectionKeyName = kundeAuftragCollectionKeyName;
-    }
-
-    @Value("${s3export.sync.export.file.extension:csv}")
-    public void setFileExtension(String fileExtension) {
-        this.fileExtension = fileExtension;
-    }
-
-    @Value("${s3export.sync.job.file.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
-    public void setTimestampFormat(String timestampFormat) {
-        this.timestampFormat = timestampFormat;
     }
 
     @Value("${s3export.sync.job.parameter.1:synchronization-timestamp}")

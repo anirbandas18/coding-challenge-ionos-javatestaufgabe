@@ -1,7 +1,7 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.filtering;
 
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.AuftraegeEntity;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.jpa.AuftraegeRepository;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.data.AuftraegeModelVo;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.proxy.AuftraegeServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.NonTransientResourceException;
@@ -10,13 +10,12 @@ import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
-public class FilteringReader implements ItemReader<List<AuftraegeEntity>> {
+public class FilteringReader implements ItemReader<List<AuftraegeModelVo>> {
 
-    private AuftraegeRepository repository;
+    private AuftraegeServiceClient client;
 
     private Long synchronizationIntervalAmount;
     private String synchronizationIntervalUnit;
@@ -32,8 +31,8 @@ public class FilteringReader implements ItemReader<List<AuftraegeEntity>> {
     }
 
     @Autowired
-    public void setRepository(AuftraegeRepository repository) {
-        this.repository = repository;
+    public void setClient(AuftraegeServiceClient client) {
+        this.client = client;
     }
 
     /**
@@ -47,21 +46,10 @@ public class FilteringReader implements ItemReader<List<AuftraegeEntity>> {
      */
 
     @Override
-    public List<AuftraegeEntity> read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+    public List<AuftraegeModelVo> read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         log.info("Request all auftraege within the last {} {}(s) as per UTC time", synchronizationIntervalAmount, synchronizationIntervalUnit);
-        List<AuftraegeEntity> filteredAuftraege = new LinkedList<>();
-                switch(synchronizationIntervalUnit) {
-            case "hour":
-                filteredAuftraege = repository.findAllWithinTheLastNHourNowAsPerUTC(synchronizationIntervalAmount);
-                break;
-            case "minute":
-                filteredAuftraege = repository.findAllWithinTheLastNMinuteNowAsPerUTC(synchronizationIntervalAmount);
-                break;
-            case "second":
-                filteredAuftraege = repository.findAllWithinTheLastNSecondNowAsPerUTC(synchronizationIntervalAmount);
-                break;
-        }
-        log.info("Retrieved {} auftraege within the last {} {}(s) as per UTC time", filteredAuftraege.size(),  synchronizationIntervalAmount, synchronizationIntervalUnit);
-        return filteredAuftraege;
+        List<AuftraegeModelVo> auftraegeModelVoList = client.getAuftraegeModelDetailsWithinTheLastNTime(synchronizationIntervalAmount.toString(), synchronizationIntervalUnit);
+        log.info("Retrieved {} auftraege within the last {} {}(s) as per UTC time", auftraegeModelVoList.size(),  synchronizationIntervalAmount, synchronizationIntervalUnit);
+        return auftraegeModelVoList;
     }
 }

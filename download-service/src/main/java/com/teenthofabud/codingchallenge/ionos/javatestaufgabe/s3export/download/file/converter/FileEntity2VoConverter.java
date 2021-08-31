@@ -6,7 +6,6 @@ import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.
 import com.teenthofabud.core.common.error.TOABSystemException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
@@ -15,14 +14,12 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.format.DateTimeFormatter;
 
 @Component
 @Slf4j
 public class FileEntity2VoConverter implements Converter<FileEntity, FileVo> {
 
     private String bucketNameDelimitter;
-    //private String bucketTimestampFormat;
 
     private Tika tika;
 
@@ -31,10 +28,6 @@ public class FileEntity2VoConverter implements Converter<FileEntity, FileVo> {
         this.tika = tika;
     }
 
-    /*@Value("${s3export.download.job.bucket.timestamp.format:yyyy-MM-dd}")
-    public void setBucketTimestampFormat(String bucketTimestampFormat) {
-        this.bucketTimestampFormat = bucketTimestampFormat;
-    }*/
 
     @Value("${s3export.download.delimitter.bucket.name:_}")
     public void setBucketNameDelimitter(String bucketNameDelimitter) {

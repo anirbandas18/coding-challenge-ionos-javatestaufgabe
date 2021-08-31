@@ -1,92 +1,37 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed;
 
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.job.step.SeedProcessor;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.job.step.SeedReader;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.job.step.SeedTask;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.job.step.SeedWriter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+
+import com.teenthofabud.core.common.factory.TOABFeignErrorDecoderFactory;
+import feign.codec.ErrorDecoder;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-
 @Configuration
+@EnableFeignClients(basePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.integration.proxy",
+                                    "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.integration.proxy"})
+@EnableEurekaClient
 @EnableBatchProcessing
 @EnableScheduling
-@EnableJpaRepositories
-@Slf4j
 public class SeedBatchConfiguration {
 
-    private Integer batchSize;
-    private String appName;
-    private StepBuilderFactory stepBuilderFactory;
-    private JobBuilderFactory jobBuilderFactory;
-
-    @Value("${s3export.seed.batch.size:10}")
-    public void setBatchSize(Integer batchSize) {
-        this.batchSize = batchSize;
-    }
-
-    @Value("${spring.application.name:seed-job}")
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-
     @Autowired
-    public void setStepBuilderFactory(StepBuilderFactory stepBuilderFactory) {
-        this.stepBuilderFactory = stepBuilderFactory;
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 
-    @Autowired
-    public void setJobBuilderFactory(JobBuilderFactory jobBuilderFactory) {
-        this.jobBuilderFactory = jobBuilderFactory;
-    }
+    private ApplicationContext applicationContext;
 
     @Bean
-    @StepScope
-    public SeedReader seedReader() {
-        return new SeedReader();
-    }
-
-    @Bean
-    @StepScope
-    public SeedProcessor seedProcessor() {
-        return new SeedProcessor();
-    }
-
-    @Bean
-    @StepScope
-    public SeedWriter seedWriter() {
-        return new SeedWriter();
-    }
-
-    @Bean
-    @StepScope
-    public SeedTask seedTask() {
-        return new SeedTask();
-    }
-
-    @Bean
-    public Step seeding() {
-        return stepBuilderFactory.get("seeding")
-                .tasklet(seedTask())
-                .build();
-    }
-
-    @Bean
-    public Job seedJob() {
-        return jobBuilderFactory.get(appName)
-                .start(seeding())
-                .build();
+    public ErrorDecoder errorDecoder() {
+        String[] feignBasePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.integration.proxy",
+                "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.integration.proxy"};
+        return new TOABFeignErrorDecoderFactory(applicationContext, feignBasePackages);
     }
 
 }

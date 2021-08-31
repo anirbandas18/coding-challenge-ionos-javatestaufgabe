@@ -3,11 +3,11 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchron
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.FileBucketCollectionDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.FileBucketDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.vo.KundeAuftragVo;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.vo.LandKundeAuftragCollectionVo;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.repository.redis.FileNameLocationCollectionRepository;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.FileBucketCollectionDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.FileBucketDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.vo.KundeAuftragVo;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.vo.LandKundeAuftragCollectionVo;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.repository.FileNameLocationCollectionRepository;
 import io.minio.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecution;
@@ -28,7 +28,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -39,12 +43,11 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
     private List<FileBucketDto> fileNameLocationMap;
     private String fileNameDelimitter;
     private String fileExtension;
-    private MinioClient minioClient;
     private String storeBaseLocation;
     private String fileTimestampFormat;
     private String bucketTimestampFormat;
-    private SimpleDateFormat fileSdf;
-    private SimpleDateFormat bucketSdf;
+    private DateTimeFormatter fileSdf;
+    private DateTimeFormatter bucketSdf;
     private FileNameLocationCollectionRepository repository;
     private StepExecution stepExecution;
     private String fileBucketCollectionKeyName;
@@ -52,6 +55,12 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
     private String jobParameterName1;
     private String bucketNamePrefix;
     private String bucketNameDelimitter;
+    private String timezone;
+
+    @Value("${s3export.sync.timezone:Europe/Paris}")
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
 
     @Value("${s3export.sync.delimitter.bucket.name:-}")
     public void setBucketNameDelimitter(String bucketNameDelimitter) {
@@ -68,7 +77,7 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
         this.fileBucketCollectionKeyName = fileBucketCollectionKeyName;
     }
 
-    @Value("${s3export.sync.job.bucket.timestamp.format:YYYY-MM-dd}")
+    @Value("${s3export.sync.job.bucket.timestamp.format:yyyy-MM-dd}")
     public void setBucketTimestampFormat(String bucketTimestampFormat) {
         this.bucketTimestampFormat = bucketTimestampFormat;
     }
@@ -78,7 +87,7 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
         this.storeBaseLocation = storeBaseLocation;
     }
 
-    @Value("${s3export.sync.job.file.timestamp.format:YYYY-MM-dd_HH-mm-ss}")
+    @Value("${s3export.sync.job.file.timestamp.format:yyyy-MM-dd'_'HH-mm-ss}")
     public void setFileTimestampFormat(String fileTimestampFormat) {
         this.fileTimestampFormat = fileTimestampFormat;
     }
@@ -104,11 +113,6 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
     }
 
     @Autowired
-    public void setMinioClient(MinioClient minioClient) {
-        this.minioClient = minioClient;
-    }
-
-    @Autowired
     public void setRepository(FileNameLocationCollectionRepository repository) {
         this.repository = repository;
     }
@@ -124,9 +128,8 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
     }
 
     private String getFileName(String country, Long timestamp) {
-        Date synchronizationDate = new Date();
-        synchronizationDate.setTime(timestamp);
-        String synchronizationDateStr = fileSdf.format(synchronizationDate);
+        LocalDateTime localDateTime = Instant.ofEpochMilli(timestamp).atZone(ZoneId.of(timezone)).toLocalDateTime();
+        String synchronizationDateStr = fileSdf.format(localDateTime);
         StringBuffer sbf = new StringBuffer();
         sbf.append(country);
         sbf.append(fileNameDelimitter);
@@ -137,9 +140,8 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
     }
 
     private String getBucketName(String country, Long timestamp) {
-        Date dt = new Date();
-        dt.setTime(timestamp);
-        String date = bucketSdf.format(dt);
+        LocalDate localDate = Instant.ofEpochMilli(timestamp).atZone(ZoneId.of(timezone)).toLocalDate();
+        String date = bucketSdf.format(localDate);
         String bucketName = String.join(bucketNameDelimitter, bucketNamePrefix, country, date);
         return bucketName;
     }
@@ -196,8 +198,8 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        fileSdf = new SimpleDateFormat(fileTimestampFormat);
-        bucketSdf = new SimpleDateFormat(bucketTimestampFormat);
+        fileSdf = DateTimeFormatter.ofPattern(fileTimestampFormat);
+        bucketSdf = DateTimeFormatter.ofPattern(bucketTimestampFormat);
         fileNameLocationMap = new LinkedList<>();
     }
 

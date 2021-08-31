@@ -7,6 +7,7 @@ import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.error.DownloadErrorCode;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -73,6 +74,19 @@ public class BucketController {
         throw new BucketException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "country", country });
     }
 
+    @Operation(summary = "Get all countries")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Retrieve all available countries",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = BucketVo.class))) })
+    })
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("country")
+    public Set<String> getAllCountries() throws BucketException {
+        Set<String> availableCountries = service.retrieveAllCountries();
+        log.debug("Responding with all available country names");
+        return availableCountries;
+    }
+
     @Operation(summary = "Get all Bucket details by date")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Buckets and their details that match the given date",
@@ -84,7 +98,7 @@ public class BucketController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("date/{date}")
-    public List<BucketVo> getAllBucketsByDate(@PathVariable String date) throws BucketException {
+    public List<BucketVo> getAllBucketsByDate(@Parameter(description = "yyyy-MM-dd") @PathVariable String date) throws BucketException {
         log.debug("Requesting all available Buckets with given date");
         if(StringUtils.hasText(StringUtils.trimWhitespace(date))) {
             List<BucketVo> matchedByDate = service.retrieveAllForDate(date);
@@ -106,7 +120,8 @@ public class BucketController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("name/{name}")
-    public BucketVo getauditDetailsById(@PathVariable String name) throws BucketException {
+    public BucketVo getauditDetailsById(@Parameter(description = "s3export-synchronization-batch.<country-name>.<yyyy-MM-dd>")
+                                            @PathVariable String name) throws BucketException {
         log.debug("Requesting all available Buckets by its name");
         if(StringUtils.hasText(StringUtils.trimWhitespace(name))) {
             BucketVo bucketDetails = service.retrieveByName(name);

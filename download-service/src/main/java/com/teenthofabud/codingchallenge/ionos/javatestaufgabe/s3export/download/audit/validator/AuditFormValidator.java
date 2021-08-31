@@ -35,5 +35,10 @@ public class AuditFormValidator implements Validator {
             errors.rejectValue("description", DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID.name());
             return;
         }
+        if(form.getUserSequence() == null || form.getUserSequence() <= 0L) {
+            log.debug("AuditForm.userSequence is empty");
+            errors.rejectValue("userSequence", DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID.name());
+            return;
+        }
     }
 }

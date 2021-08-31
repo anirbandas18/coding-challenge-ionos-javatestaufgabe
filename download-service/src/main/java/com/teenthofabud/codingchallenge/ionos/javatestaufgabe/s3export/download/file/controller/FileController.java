@@ -1,12 +1,18 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.file.controller;
 
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.audit.data.AuditException;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.audit.data.AuditForm;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.audit.service.AuditService;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.error.DownloadErrorCode;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.file.data.FileException;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.file.data.FileMessageTemplate;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.file.data.FileVo;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.file.service.FileService;
+import com.teenthofabud.core.common.constant.TOABBaseAction;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
+import com.teenthofabud.core.common.service.TOABAuditService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,7 +34,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("file")
 @Slf4j
 @Tag(name = "File Search API", description = "Get files and their details")
-public class FileController {
+public class FileController implements TOABAuditService {
+
+    private static final Long DEFAULT_USER_ID = 1L;
+
+    private AuditService audit;
 
     @Autowired
     public void setService(FileService service) {
@@ -37,9 +47,25 @@ public class FileController {
 
     private FileService service;
 
-    @Operation(summary = "Download content of latest file by date of country")
+    @Autowired
+    public void setAudit(AuditService audit) {
+        this.audit = audit;
+    }
+
+    private AuditForm getAudit(String action, String message, Long userSequence, String input, String output) {
+        AuditForm form = new AuditForm();
+        form.setAction(action);
+        form.setModule(module());
+        form.setDescription(message);
+        form.setInput(input);
+        form.setOutput(output);
+        form.setUserSequence(userSequence);
+        return form;
+    }
+
+    @Operation(summary = "Download content of latest file by country")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Downloaded content of the lastest file by date of the given country",
+        @ApiResponse(responseCode = "200", description = "Downloaded content of the latest file by country",
             content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = FileVo.class))) }),
         @ApiResponse(responseCode = "400", description = "File country is invalid",
             content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
@@ -48,66 +74,100 @@ public class FileController {
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("country/{country}")
-    public ResponseEntity<?> getAllFilesByCountry(@PathVariable String country) throws FileException {
+    public ResponseEntity<?> getLatestFileByCountry(@PathVariable String country, @Parameter(in = ParameterIn.HEADER, description = "user sequence, a whole number greater than zero")
+        @RequestHeader(required = true, name = "S3EXPORT-USER-SEQ") String s3exportUserSeq) throws FileException, AuditException {
+        Long userSequence = 0L;
+        try {
+            userSequence = Long.parseLong(s3exportUserSeq);
+        } catch (NumberFormatException e) {
+            String msg = "Invalid user sequence";
+            log.debug(msg + " : " + s3exportUserSeq, e);
+            AuditForm form = getAudit(TOABBaseAction.READ.getName(), msg + ": " + e.getMessage(), DEFAULT_USER_ID, "S3EXPORT-USER-SEQ: " + s3exportUserSeq, "");
+            audit.createAudit(form);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "S3EXPORT-USER-SEQ", s3exportUserSeq });
+        }
         log.debug("Requesting the latest File content by date with given country");
         if(StringUtils.hasText(StringUtils.trimWhitespace(country))) {
             FileVo matchedByCountry = service.retrieveBy(country);
             ByteArrayResource resource = new ByteArrayResource(matchedByCountry.getContent());
-            log.debug("Responding with the latest File content by date with given country");
+            log.debug("Responding with the file: {}", matchedByCountry.getName());
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + matchedByCountry.getName());
             headers.add(HttpHeaders.CONTENT_TYPE, matchedByCountry.getType());
+            String msg = "Downloading file";
+            AuditForm form = getAudit(TOABBaseAction.READ.getName(), msg, userSequence,  "Country: " + country,
+                    "File name: " + matchedByCountry.getName() + ", Type: " + matchedByCountry.getType() + ", Length: " + matchedByCountry.getContent().length);
+            audit.createAudit(form);
             return ResponseEntity.ok()
                     .headers(headers)
                     .contentLength(matchedByCountry.getContent().length)
                     .body(resource);
         }
-        log.debug("File country is empty");
+        String msg = "File country is empty";
+        log.debug(msg);
+        AuditForm form = getAudit(TOABBaseAction.READ.getName(), msg, userSequence, "country: " + country, "");
+        audit.createAudit(form);
         throw new FileException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "country", country });
     }
 
-    /*@Operation(summary = "Get all File details by date")
+    @Operation(summary = "Download content of file for given date and country where date should be in format yyyy-MM-dd")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available Files and their details that match the given date",
+            @ApiResponse(responseCode = "200", description = "Downloaded content of the of the file matching the date and country",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = FileVo.class))) }),
-            @ApiResponse(responseCode = "400", description = "File date is invalid",
+            @ApiResponse(responseCode = "400", description = "File country/date is invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No Files available with the given date",
+            @ApiResponse(responseCode = "404", description = "No Files available with the given country on specified date",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("date/{date}")
-    public List<FileVo> getAllFilesByDate(@PathVariable String date) throws FileException {
-        log.debug("Requesting all available Files with given date");
-        if(StringUtils.hasText(StringUtils.trimWhitespace(date))) {
-            List<FileVo> matchedByActions = service.retrieveAllForDate(date);
-            log.debug("Responding with all available Files with given date");
-            return matchedByActions;
+    @GetMapping("country/{country}/date/{date}")
+    public ResponseEntity<?> getFileForCountryOndate(@PathVariable String country, @Parameter(in = ParameterIn.HEADER, description = "user sequence, a whole number greater than zero")
+    @RequestHeader(required = true, name = "S3EXPORT-USER-SEQ") String s3exportUserSeq, @Parameter(description = "yyyy-MM-dd_HH-mm-ss") @PathVariable String date)
+            throws FileException, AuditException {
+        Long userSequence = 0L;
+        try {
+            userSequence = Long.parseLong(s3exportUserSeq);
+        } catch (NumberFormatException e) {
+            String msg = "Invalid user sequence";
+            log.debug(msg + " : " + s3exportUserSeq, e);
+            AuditForm form = getAudit(TOABBaseAction.READ.getName(), msg + ": " + e.getMessage(), DEFAULT_USER_ID, "S3EXPORT-USER-SEQ: " + s3exportUserSeq, "");
+            audit.createAudit(form);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "S3EXPORT-USER-SEQ", s3exportUserSeq });
         }
-        log.debug("File date is empty");
-        throw new FileException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "date", date });
+        log.debug("Requesting the file content on date for the given country");
+        if(StringUtils.hasText(StringUtils.trimWhitespace(country)) && StringUtils.hasText(StringUtils.trimWhitespace(date))) {
+            FileVo matchedByCountryAndDate = service.retrieveBy(country, date);
+            ByteArrayResource resource = new ByteArrayResource(matchedByCountryAndDate.getContent());
+            log.debug("Responding with the file content by date with given country for the specified date");
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + matchedByCountryAndDate.getName());
+            headers.add(HttpHeaders.CONTENT_TYPE, matchedByCountryAndDate.getType());
+            String msg = "Downloading file";
+            AuditForm form = getAudit(TOABBaseAction.READ.getName(), msg, userSequence,  "Country: " + country + ", Date: " + date,
+                    "File name: " + matchedByCountryAndDate.getName() + ", Type: " + matchedByCountryAndDate.getType() + ", Length: " + matchedByCountryAndDate.getContent().length);
+            audit.createAudit(form);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(matchedByCountryAndDate.getContent().length)
+                    .body(resource);
+        } else if(country == null || country.length() == 0) {
+            String msg = "File country is empty";
+            log.debug(msg);
+            AuditForm form = getAudit(TOABBaseAction.READ.getName(), msg, userSequence, "country: " + country, "");
+            audit.createAudit(form);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "country", country });
+        } else  {
+            String msg = "File date is empty";
+            log.debug(msg);
+            AuditForm form = getAudit(TOABBaseAction.READ.getName(), msg, userSequence, "date: " + date, "");
+            audit.createAudit(form);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "date", date });
+        }
     }
 
-    @Operation(summary = "Get File details by name")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve the details of File that matches the given ˇ",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FileVo.class)) }),
-            @ApiResponse(responseCode = "400", description = "File name is invalid",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No File found with the given name",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
-    })
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("name/{name}")
-    public FileVo getauditDetailsById(@PathVariable String name) throws FileException {
-        log.debug("Requesting all available Files by its name");
-        if(StringUtils.hasText(StringUtils.trimWhitespace(name))) {
-            FileVo fileDetails = service.retrieveByName(name);
-            log.debug("Responding with successful retrieval of existing File details by name");
-            return fileDetails;
-        }
-        log.debug(FileMessageTemplate.MSG_TEMPLATE_BUCKET_NAME_EMPTY.getValue());
-        throw new FileException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "name", name });
-    }*/
+    @Override
+    public String module() {
+        return "File";
+    }
 
 }

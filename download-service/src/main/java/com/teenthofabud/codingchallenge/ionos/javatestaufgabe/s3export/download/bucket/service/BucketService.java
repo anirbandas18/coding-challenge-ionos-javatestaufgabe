@@ -12,6 +12,8 @@ public interface BucketService {
 
     public Set<BucketVo> retrieveAllByNaturalOrdering() throws BucketException;
 
+    public Set<String> retrieveAllCountries() throws BucketException;
+
     public BucketVo retrieveByName(String name)  throws BucketException;
 
     public List<BucketVo> retrieveAllForCountry(String country)  throws BucketException;

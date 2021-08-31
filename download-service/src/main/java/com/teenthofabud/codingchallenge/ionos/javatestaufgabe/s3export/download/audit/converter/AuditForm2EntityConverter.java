@@ -14,9 +14,13 @@ public class AuditForm2EntityConverter extends TOABBaseEntityAuditHandler implem
     @Override
     public AuditEntity convert(AuditForm form) {
         AuditEntity entity = new AuditEntity();
+        entity.setInput(form.getInput());
+        entity.setOutput(form.getOutput());
         entity.setAction(form.getAction());
         entity.setModule(form.getModule());
         entity.setDescription(form.getDescription());
+        entity.setCreatedBy(form.getUserSequence());
+        entity.setModifiedBy(form.getUserSequence());
         super.assignAuditValues(entity, Boolean.TRUE);
         log.debug("Converting {} to {}", form, entity);
         return entity;

@@ -1,7 +1,7 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.upload;
 
 import com.google.common.net.MediaType;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.FileBucketDto;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.FileBucketDto;
 import io.minio.MinioClient;
 import io.minio.ObjectWriteResponse;
 import io.minio.UploadObjectArgs;
@@ -17,10 +17,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -29,31 +25,10 @@ import java.util.TreeMap;
 public class UploadWriter implements ItemWriter<List<FileBucketDto>> {
 
     private MinioClient minioClient;
-    private String timeZone;
-    private Long retentionPeriodInYears;
-
-    @Value("${s3export.sync.timezone:Europe/Paris}")
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
-    }
-
-    @Value("${s3export.sync.retention.in.years:3}")
-    public void setRetentionPeriodInYears(Long retentionPeriodInYears) {
-        this.retentionPeriodInYears = retentionPeriodInYears;
-    }
 
     @Autowired
     public void setMinioClient(MinioClient minioClient) {
         this.minioClient = minioClient;
-    }
-
-    private ZonedDateTime getRetentionTimestamp() {
-        ZoneId ect = ZoneId.of(timeZone);
-        LocalDateTime localTimestampNow = LocalDateTime.now();
-        ZonedDateTime dateAndTimeInEct = ZonedDateTime.of(localTimestampNow, ect);
-        ZonedDateTime dateAndTimeNowInUtc = dateAndTimeInEct.withZoneSameInstant(ZoneOffset.UTC);
-        ZonedDateTime dateAndTimeForFutureInUtc = dateAndTimeNowInUtc.plusYears(retentionPeriodInYears);
-        return dateAndTimeForFutureInUtc;
     }
 
     /**

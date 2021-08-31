@@ -26,12 +26,12 @@ public interface FileService {
     public FileVo retrieveBy(String country)  throws FileException;
 
     /**
-     * Get the specific file for the country on the specified timestamp
+     * Get the specific file for the country on the specified datd
      * @param country
-     * @param timestamp
+     * @param date
      * @return
      * @throws FileException
      */
-    public FileVo retrieveBy(String country, String timestamp)  throws FileException;
+    public FileVo retrieveBy(String country, String date)  throws FileException;
 
 }

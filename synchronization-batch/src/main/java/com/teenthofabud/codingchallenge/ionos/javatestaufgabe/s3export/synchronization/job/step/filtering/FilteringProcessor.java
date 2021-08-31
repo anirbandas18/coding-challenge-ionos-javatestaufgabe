@@ -1,7 +1,7 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.filtering;
 
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.dto.AuftragKundeDto;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.data.entity.AuftraegeEntity;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.data.AuftraegeModelVo;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.AuftragKundeDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class FilteringProcessor implements ItemProcessor<List<AuftraegeEntity>, List<AuftragKundeDto>> {
+public class FilteringProcessor implements ItemProcessor<List<AuftraegeModelVo>, List<AuftragKundeDto>> {
 
     /**
      * Convert list of auftraege entity to list of auftrag kunde map
@@ -19,13 +19,13 @@ public class FilteringProcessor implements ItemProcessor<List<AuftraegeEntity>, 
      */
 
     @Override
-    public List<AuftragKundeDto> process(List<AuftraegeEntity> items) throws Exception {
+    public List<AuftragKundeDto> process(List<AuftraegeModelVo> items) throws Exception {
         List<AuftragKundeDto> auftragKundeDtos = new ArrayList<>(items.size());
-        for(AuftraegeEntity item : items) {
+        for(AuftraegeModelVo item : items) {
             AuftragKundeDto akDto = new AuftragKundeDto();
-            akDto.setAuftragId(item.getId().getAuftragId());
-            akDto.setArtikelNummer(item.getId().getArtikelNummber());
-            akDto.setKundeId(Long.parseLong(item.getId().getKundenId()));
+            akDto.setAuftragId(item.getAuftragId());
+            akDto.setArtikelNummer(item.getArtikelNummer());
+            akDto.setKundeId(Long.parseLong(item.getKundenId()));
             log.debug("Converted {} to {}", item, akDto);
             auftragKundeDtos.add(akDto);
         }

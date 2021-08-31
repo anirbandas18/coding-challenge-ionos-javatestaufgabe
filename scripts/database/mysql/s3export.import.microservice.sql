@@ -1111,11 +1111,22 @@ INSERT INTO `S3EXPORT_AUFTRAEGE_DB`.`auftraege` (`auftragid`, `artikelnummer`, `
 
 
 #
-# INITIAL SEED DATA FOR: spring batch framework
+# INITIAL SEED DATA FOR: spring batch framework on AUFTRAEGE DB
 #
 
-INSERT INTO `S3EXPORT_AUFTRAEGE_DB`.`BATCH_STEP_EXECUTION_SEQ` (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from `S3EXPORT_AUFTRAEGE_DB`.`BATCH_STEP_EXECUTION_SEQ`);
+INSERT INTO `S3EXPORT_SEED_DB`.`BATCH_STEP_EXECUTION_SEQ` (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from `S3EXPORT_SEED_DB`.`BATCH_STEP_EXECUTION_SEQ`);
 
-INSERT INTO `S3EXPORT_AUFTRAEGE_DB`.`BATCH_JOB_EXECUTION_SEQ` (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from `S3EXPORT_AUFTRAEGE_DB`.`BATCH_JOB_EXECUTION_SEQ`);
+INSERT INTO `S3EXPORT_SEED_DB`.`BATCH_JOB_EXECUTION_SEQ` (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from `S3EXPORT_SEED_DB`.`BATCH_JOB_EXECUTION_SEQ`);
 
-INSERT INTO `S3EXPORT_AUFTRAEGE_DB`.`BATCH_JOB_SEQ` (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from `S3EXPORT_AUFTRAEGE_DB`.`BATCH_JOB_SEQ`);
+INSERT INTO `S3EXPORT_SEED_DB`.`BATCH_JOB_SEQ` (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from `S3EXPORT_SEED_DB`.`BATCH_JOB_SEQ`);
+
+
+#
+# INITIAL SEED DATA FOR: spring batch framework on KUNDE DB
+#
+
+INSERT INTO `S3EXPORT_SYNC_DB`.`BATCH_STEP_EXECUTION_SEQ` (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from `S3EXPORT_SYNC_DB`.`BATCH_STEP_EXECUTION_SEQ`);
+
+INSERT INTO `S3EXPORT_SYNC_DB`.`BATCH_JOB_EXECUTION_SEQ` (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from `S3EXPORT_SYNC_DB`.`BATCH_JOB_EXECUTION_SEQ`);
+
+INSERT INTO `S3EXPORT_SYNC_DB`.`BATCH_JOB_SEQ` (ID, UNIQUE_KEY) select * from (select 0 as ID, '0' as UNIQUE_KEY) as tmp where not exists(select * from `S3EXPORT_SYNC_DB`.`BATCH_JOB_SEQ`);
