@@ -24,7 +24,7 @@ public class BucketRepositoryMinioImpl implements BucketRepository {
 
     private static final Comparator<BucketEntity> CMP_BY_COUNTRY_DATE = (s1, s2) -> {
         return Integer.compare(s1.getCountry().compareTo(s2.getCountry()),
-                s2.getDate().compareTo(s1.getDate()));
+                s1.getDate().compareTo(s2.getDate()));
     };
 
     private MinioClient minioClient;

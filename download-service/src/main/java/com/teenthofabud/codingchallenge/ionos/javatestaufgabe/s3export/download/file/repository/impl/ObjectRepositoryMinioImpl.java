@@ -33,7 +33,7 @@ public class ObjectRepositoryMinioImpl implements FileRepository, InitializingBe
     private static final String FILE_EXTENSION_DELIMITTER = ".";
     private static final Comparator<FileDetailEntity> CMP_BY_COUNTRY_ASC_DATE_DESC = (s1, s2) -> {
         return Integer.compare(s1.getCountry().compareTo(s2.getCountry()),
-                s2.getDateTime().compareTo(s1.getDateTime()));
+                s1.getDateTime().compareTo(s2.getDateTime()));
     };
 
     private DateTimeFormatter fileDtf;
