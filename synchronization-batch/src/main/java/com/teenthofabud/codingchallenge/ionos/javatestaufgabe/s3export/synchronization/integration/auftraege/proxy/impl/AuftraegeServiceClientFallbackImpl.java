@@ -13,12 +13,12 @@ import java.util.List;
 public class AuftraegeServiceClientFallbackImpl implements AuftraegeServiceClient {
 
     @Override
-    public List<AuftraegeModelVo> getAuftraegeModelDetailsWithinTheLastNTime(String amount, String unit) throws AuftraegeException {
+    public List<AuftraegeModelVo> getAuftraegeModelDetailsWithinTheLastNTime(String amount, String unit) {
         return new LinkedList<>();
     }
 
     @Override
-    public AuftraegeModelVo getAuftraegeModelDetailsByAuftragIdArtikelNummerKundenId(String auftragId, String artikelNummer, String kundenId) throws AuftraegeException {
+    public AuftraegeModelVo getAuftraegeModelDetailsByAuftragIdArtikelNummerKundenId(String auftragId, String artikelNummer, String kundenId) {
         return new AuftraegeModelVo();
     }
 

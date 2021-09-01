@@ -2,7 +2,6 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auf
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.integration.data.AuftraegeModelForm;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.integration.data.AuftraegeModelVo;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.integration.error.AuftraegeException;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.integration.proxy.AuftraegeServiceClient;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class AuftraegeServiceClientFallbackImpl implements AuftraegeServiceClient {
 
     @Override
-    public AuftraegeModelVo getAuftraegeModelDetailsByAuftragIdArtikelNummerKundenId(String auftragId, String artikelNummer, String kundenId) throws AuftraegeException {
+    public AuftraegeModelVo getAuftraegeModelDetailsByAuftragIdArtikelNummerKundenId(String auftragId, String artikelNummer, String kundenId) {
         return new AuftraegeModelVo();
     }
 

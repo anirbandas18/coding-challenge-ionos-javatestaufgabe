@@ -6,7 +6,7 @@ volumes:
 services:
 
   rdbms-service:
-    image: mysql:8.0.26
+    image: mysql:8.0.22
     container_name: rdbms-service
     command: --default-authentication-plugin=mysql_native_password
     restart: always
@@ -14,44 +14,63 @@ services:
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - /opt/ionos-javatestaufgabe-s3export/var/lib/mysql:/var/lib/mysql
-      - /opt/ionos-javatestaufgabe-s3export/scripts/database/s3export.admin.sql:/docker-entrypoint-initdb.d/mysql.s3export.admin.sql
-      - /opt/ionos-javatestaufgabe-s3export/scripts/database/s3export.ddl.sql:/docker-entrypoint-initdb.d/mysql.s3export.ddl.sql
+      - /opt/ionos-javatestaufgabe-s3export/scripts/database/mysql/s3export.admin.microservice.sql:/docker-entrypoint-initdb.d/1.sql
+      - /opt/ionos-javatestaufgabe-s3export/scripts/database/mysq/s3export.ddl.microservice.sql:/docker-entrypoint-initdb.d/2.sql
+      - /opt/ionos-javatestaufgabe-s3export/scripts/database/mysq/s3export.import.microservice.sql:/docker-entrypoint-initdb.d/3.sql
+      - /opt/ionos-javatestaufgabe-s3export/scripts/database/mysq/s3export.import.microservice.sql:/docker-entrypoint-initdb.d/3.sql
     ports:
       - 3306:3306
 
-  tracing-service:
-    image: openzipkin/zipkin
-    container_name: tracing-service
-    restart: always
-    ports:
-      - 9411:9411
-
-  synchronization-service:
-    image: teenthofabud/s3export-synchronization-batchß:0.0.1-SNAPSHOT
-    container_name: synchronization-service
+  auftraege-service:
+    image: teenthofabud/s3export-auftraege-service:2.0.0-SNAPSHOT
+    container_name: auftraege-service
     restart: on-failure
     ports:
       - 8001:8001
     environment:
-      - PROFILE=development
+      - SPRING_PROFILES_ACTIVE=development
       - LOGGING_LEVEL=INFO
       - DATABASE_HOST=localhost
       - DATABASE_PORT=3306
       - LOGSTASH_ENABLED=true
       - LOGSTASH_HOST=localhost
-      - LOGSTASH_PORT=4056
+      - LOGSTASH_PORT=4560
+      - SHOW_SQL=false
+      - CLOUD_CONFIG_ENABLED=false
 
-  partner-service:
-    image: teenthofabud/s3export-partner-service:0.0.1-SNAPSHOT
-    container_name: partner-service
-    restart: on-failure
-    ports:
-      - 9001:9001
-    environment:
-      - PROFILE=development
-      - LOGGING_LEVEL=INFO
-      - DATABASE_HOST=localhost
-      - DATABASE_PORT=3306
-      - LOGSTASH_ENABLED=true
-      - LOGSTASH_HOST=localhost
-      - LOGSTASH_PORT=4056
+#  tracing-service:
+#    image: openzipkin/zipkin
+#    container_name: tracing-service
+#    restart: always
+#    ports:
+#      - 9411:9411
+
+#  synchronization-service:
+#    image: teenthofabud/s3export-synchronization-batchß:0.0.1-SNAPSHOT
+#    container_name: synchronization-service
+#    restart: on-failure
+#    ports:
+#      - 8001:8001
+#    environment:
+#      - PROFILE=development
+#      - LOGGING_LEVEL=INFO
+#      - DATABASE_HOST=localhost
+#      - DATABASE_PORT=3306
+#      - LOGSTASH_ENABLED=true
+#      - LOGSTASH_HOST=localhost
+#      - LOGSTASH_PORT=4056
+
+#  partner-service:
+#    image: teenthofabud/s3export-partner-service:0.0.1-SNAPSHOT
+#    container_name: partner-service
+#    restart: on-failure
+#    ports:
+#      - 9001:9001
+#    environment:
+#      - PROFILE=development
+#      - LOGGING_LEVEL=INFO
+#      - DATABASE_HOST=localhost
+#      - DATABASE_PORT=3306
+#      - LOGSTASH_ENABLED=true
+#      - LOGSTASH_HOST=localhost
+#      - LOGSTASH_PORT=4056

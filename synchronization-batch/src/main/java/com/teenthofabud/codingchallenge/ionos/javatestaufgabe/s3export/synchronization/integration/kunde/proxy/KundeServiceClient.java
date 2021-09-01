@@ -2,7 +2,6 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchron
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.data.KundeModelForm;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.data.KundeModelVo;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.error.KundeException;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.error.KundeServiceClientExceptionHandler;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.proxy.impl.KundeServiceClientFallbackImpl;
 import com.teenthofabud.core.common.marker.TOABFeignErrorHandler;
@@ -17,10 +16,10 @@ public interface KundeServiceClient {
 
     @GetMapping("/model/kundenid/{kundenId}")
     @TOABFeignErrorHandler(KundeServiceClientExceptionHandler.class)
-    public KundeModelVo getKundeModelDetailsByKundenId(@PathVariable String kundenId) throws KundeException;
+    public KundeModelVo getKundeModelDetailsByKundenId(@PathVariable String kundenId);
 
     @PostMapping("/model")
     @TOABFeignErrorHandler(KundeServiceClientExceptionHandler.class)
-    public String postNewKundeModel(@RequestBody KundeModelForm form) throws KundeException;
+    public String postNewKundeModel(@RequestBody KundeModelForm form);
 
 }

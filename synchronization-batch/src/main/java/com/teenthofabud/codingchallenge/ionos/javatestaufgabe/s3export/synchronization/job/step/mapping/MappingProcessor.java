@@ -6,24 +6,43 @@ import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchroni
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.data.dto.KundeAuftragDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class MappingProcessor implements ItemProcessor<List<AuftragKundeDto>, List<KundeAuftragDto>> {
+public class MappingProcessor implements ItemProcessor<List<AuftragKundeDto>, List<KundeAuftragDto>>, InitializingBean {
 
     private KundeServiceClient client;
+
+    private CircuitBreakerFactory globalCircuitBreakerFactory;
+
+    private CircuitBreaker kundeServiceCircuitBreaker;
+
+    @Autowired
+    public void setGlobalCircuitBreakerFactory(CircuitBreakerFactory globalCircuitBreakerFactory) {
+        this.globalCircuitBreakerFactory = globalCircuitBreakerFactory;
+    }
 
     @Autowired
     public void setClient(KundeServiceClient client) {
         this.client = client;
     }
 
+    private KundeModelVo defaultGetKundeModelDetailsByKundenId(@PathVariable String kundenId) {
+        return new KundeModelVo();
+    }
+
     private KundeAuftragDto convert(AuftragKundeDto item) throws Exception {
         KundeAuftragDto dto = new KundeAuftragDto();
-        KundeModelVo vo = client.getKundeModelDetailsByKundenId(item.getKundeId().toString());
+        KundeModelVo vo = kundeServiceCircuitBreaker.run(() -> client.getKundeModelDetailsByKundenId(item.getKundeId().toString()),
+                throwable -> defaultGetKundeModelDetailsByKundenId(item.getKundeId().toString()));
+        // TODO analyze KundeModelVo vo to ascertain whether this an exception should be throw or not for skipping
         dto.setFirma(vo.getFirmenName());
         dto.setLand(vo.getLand());
         dto.setNachName(vo.getNachName());
@@ -54,5 +73,10 @@ public class MappingProcessor implements ItemProcessor<List<AuftragKundeDto>, Li
         }
         log.info("Converted {} AuftragKundeDto to {} KundeAuftragDto", items.size(), kundeAuftragDtoList.size());
         return kundeAuftragDtoList;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.kundeServiceCircuitBreaker = globalCircuitBreakerFactory.create("kunde");
     }
 }

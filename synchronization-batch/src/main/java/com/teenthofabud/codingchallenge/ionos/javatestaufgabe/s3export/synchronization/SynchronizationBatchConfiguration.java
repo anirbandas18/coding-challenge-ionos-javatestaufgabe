@@ -26,6 +26,8 @@ import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchroni
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.job.step.upload.UploadWriter;
 import com.teenthofabud.core.common.factory.TOABFeignErrorDecoderFactory;
 import feign.codec.ErrorDecoder;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -34,6 +36,9 @@ import org.springframework.batch.core.configuration.annotation.*;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
+import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JConfigBuilder;
+import org.springframework.cloud.client.circuitbreaker.Customizer;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
@@ -42,6 +47,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.time.Duration;
 import java.util.List;
 
 @Configuration
@@ -294,6 +300,27 @@ public class SynchronizationBatchConfiguration {
         String[] feignBasePackages = { "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.proxy",
                 "com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.proxy" };
         return new TOABFeignErrorDecoderFactory(applicationContext, feignBasePackages);
+    }
+
+    @Bean
+    public Customizer<Resilience4JCircuitBreakerFactory> globalCircuitBreakerFactory(
+            @Value("${s3export.sync.circuit-breaker.failure.threshold-percentage}") float failureThresholdPercentage,
+            @Value("${s3export.sync.circuit-breaker.wait.duration.in-open-state}") long waitDurationInOpenStateInMillis,
+            @Value("${s3export.sync.circuit-breaker.sliding-window.size}") int slidingWindowSize,
+            @Value("${s3export.sync.circuit-breaker.timeout.duration}") long timeoutDurationInSeconds) {
+
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(failureThresholdPercentage)
+                .waitDurationInOpenState(Duration.ofMillis(waitDurationInOpenStateInMillis))
+                .slidingWindowSize(slidingWindowSize)
+                .build();
+        TimeLimiterConfig timeLimiterConfig = TimeLimiterConfig.custom()
+                .timeoutDuration(Duration.ofSeconds(timeoutDurationInSeconds))
+                .build();
+        return factory -> factory.configureDefault(id -> new Resilience4JConfigBuilder(id)
+                .timeLimiterConfig(timeLimiterConfig)
+                .circuitBreakerConfig(circuitBreakerConfig)
+                .build());
     }
 
 }

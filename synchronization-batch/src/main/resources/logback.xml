@@ -6,7 +6,7 @@
     <property resource="bootstrap.properties" />
     <property name="LOGS_DIR" value="logs" />
     <property name="LOG_FILE_NAME" value="${spring.application.name}" />
-    <property name="LOGSTASH_HOST" value="${logstash.host}" />
+    <property name="LOGSTASH_URL" value="${logstash.url}" />
 
     <appender name="Console"
               class="ch.qos.logback.core.ConsoleAppender">
@@ -35,10 +35,10 @@
         </rollingPolicy>
     </appender>
 
-    <if condition='${logstash.enabled} == true'>
+    <if condition='&quot;${spring.profiles.active}&quot;.equals(&quot;local&quot;)'>
         <then>
             <appender name="Stash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-                <destination>${LOGSTASH_HOST}</destination>
+                <destination>${LOGSTASH_URL}</destination>
 
                 <keepAliveDuration>1 minute</keepAliveDuration>
                 <reconnectionDelay>1 second</reconnectionDelay>
@@ -53,7 +53,7 @@
     <root level="info">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
-        <if condition='${logstash.enabled} == true'>
+        <if condition='&quot;${spring.profiles.active}&quot;.equals(&quot;local&quot;)'>
             <then>
                 <appender-ref ref="Stash" />
             </then>
@@ -62,14 +62,11 @@
 
     <if condition='&quot;${spring.profiles.active}&quot;.equals(&quot;local&quot;)'>
         <then>
+
             <logger name="com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization" level="info" additivity="false">
                 <appender-ref ref="RollingFile" />
                 <appender-ref ref="Console" />
-                <if condition='${logstash.enabled} == true'>
-                    <then>
-                        <appender-ref ref="Stash" />
-                    </then>
-                </if>
+                <appender-ref ref="Stash" />
             </logger>
 
             <logger name="logging.level.org.hibernate.SQL" level="info">
@@ -90,11 +87,6 @@
             <logger name="com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization" level="info" additivity="false">
                 <appender-ref ref="RollingFile" />
                 <appender-ref ref="Console" />
-                <if condition='${logstash.enabled} == true'>
-                    <then>
-                        <appender-ref ref="Stash" />
-                    </then>
-                </if>
             </logger>
 
             <logger name="logging.level.org.hibernate.SQL" level="debug">

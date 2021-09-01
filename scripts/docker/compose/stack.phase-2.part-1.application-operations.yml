@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+
+  naming-service:
+    image: teenthofabud/s3export-naming-service:0.0.1-SNAPSHOT
+    container_name: naming-service
+    ports:
+      - 8761:8761
+
+  configuration-service:
+    image: teenthofabud/s3export-configuration-service:0.0.1-SNAPSHOT
+    container_name: configuration-service
+    hostname: configuration-service
+    restart: on-failure
+    volumes:
+      - /opt/laundromat-manager/laundromat-service-configurations:/opt/laundromat-manager/laundromat-service-configurations
+    ports:
+      - 8888:8888

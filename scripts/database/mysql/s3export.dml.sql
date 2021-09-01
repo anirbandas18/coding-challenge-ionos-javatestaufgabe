@@ -6,9 +6,11 @@ select str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000'), lastchange from s3expo
 
 select * from kunde;
 
-select * from s3export_auftraege_db.auftraege order by created desc;
-select * from s3export_kunde_db.kunde;
-select * from s3export_download_db.audit_event;
+select * from S3EXPORT_AUFTRAEGE_DB.auftraege order by created desc;
+select * from S3EXPORT_KUNDE_DB.kunde;
+select * from S3EXPORT_DOWNLOAD_DB.audit_event;
+
+show databases like 'S3EXPORT%';
 
 select kundeid, 
 TIMESTAMPDIFF(hour, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) as diff_utc, 

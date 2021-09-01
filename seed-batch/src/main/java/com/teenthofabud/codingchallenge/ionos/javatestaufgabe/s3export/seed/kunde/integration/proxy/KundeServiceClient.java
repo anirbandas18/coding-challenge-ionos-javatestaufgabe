@@ -17,10 +17,10 @@ public interface KundeServiceClient {
 
     @GetMapping("/model/kundenid/{kundenId}")
     @TOABFeignErrorHandler(KundeServiceClientExceptionHandler.class)
-    public KundeModelVo getKundeModelDetailsByKundenId(@PathVariable String kundenId) throws KundeException;
+    public KundeModelVo getKundeModelDetailsByKundenId(@PathVariable String kundenId);
 
     @PostMapping("/model")
     @TOABFeignErrorHandler(KundeServiceClientExceptionHandler.class)
-    public String postNewKundeModel(@RequestBody KundeModelForm form) throws KundeException;
+    public String postNewKundeModel(@RequestBody KundeModelForm form);
 
 }

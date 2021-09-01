@@ -2,7 +2,6 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchron
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.data.AuftraegeModelForm;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.data.AuftraegeModelVo;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.error.AuftraegeException;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.error.AuftraegeServiceClientExceptionHandler;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.auftraege.proxy.impl.AuftraegeServiceClientFallbackImpl;
 import com.teenthofabud.core.common.marker.TOABFeignErrorHandler;
@@ -20,16 +19,15 @@ public interface AuftraegeServiceClient {
     @GetMapping("/model/range")
     @TOABFeignErrorHandler(AuftraegeServiceClientExceptionHandler.class)
     public List<AuftraegeModelVo> getAuftraegeModelDetailsWithinTheLastNTime(@RequestParam(required = false) String amount,
-                                                                             @RequestParam(required = false) String unit) throws AuftraegeException;
+                                                                             @RequestParam(required = false) String unit);
 
     @GetMapping("/model/filter")
     @TOABFeignErrorHandler(AuftraegeServiceClientExceptionHandler.class)
     public AuftraegeModelVo getAuftraegeModelDetailsByAuftragIdArtikelNummerKundenId(
-            @RequestParam(required = false) String auftragId, @RequestParam(required = false) String artikelNummer, @RequestParam(required = false) String kundenId)
-            throws AuftraegeException;
+            @RequestParam(required = false) String auftragId, @RequestParam(required = false) String artikelNummer, @RequestParam(required = false) String kundenId);
 
     @PostMapping("/model")
     @TOABFeignErrorHandler(AuftraegeServiceClientExceptionHandler.class)
-    public String postNewAuftraegeModel(@RequestBody AuftraegeModelForm form) throws AuftraegeException;
+    public String postNewAuftraegeModel(@RequestBody AuftraegeModelForm form);
 
 }

@@ -2,19 +2,18 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchron
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.data.KundeModelForm;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.data.KundeModelVo;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.error.KundeException;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.synchronization.integration.kunde.proxy.KundeServiceClient;
 import org.springframework.stereotype.Component;
 
 @Component
 public class KundeServiceClientFallbackImpl implements KundeServiceClient {
     @Override
-    public KundeModelVo getKundeModelDetailsByKundenId(String kundenId) throws KundeException {
+    public KundeModelVo getKundeModelDetailsByKundenId(String kundenId){
         return new KundeModelVo();
     }
 
     @Override
-    public String postNewKundeModel(KundeModelForm form) throws KundeException {
+    public String postNewKundeModel(KundeModelForm form) {
         return "";
     }
 }
