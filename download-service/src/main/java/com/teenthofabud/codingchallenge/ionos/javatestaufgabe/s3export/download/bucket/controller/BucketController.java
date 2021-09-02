@@ -6,6 +6,7 @@ import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.bucket.service.BucketService;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.error.DownloadErrorCode;
 import com.teenthofabud.core.common.data.vo.ErrorVo;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -37,7 +38,8 @@ public class BucketController {
     }
 
     private BucketService service;
-    
+
+    @Hidden
     @Operation(summary = "Get all Bucket details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Buckets and their details",
@@ -52,6 +54,7 @@ public class BucketController {
         return naturallyOrderedBuckets;
     }
 
+    @Hidden
     @Operation(summary = "Get all Bucket details by country")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Retrieve all available Buckets and their details that match the given country",
@@ -74,9 +77,9 @@ public class BucketController {
         throw new BucketException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "country", country });
     }
 
-    @Operation(summary = "Get all countries")
+    @Operation(summary = "Get all available countries")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all available countries",
+            @ApiResponse(responseCode = "200", description = "Names of all available countries",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = BucketVo.class))) })
     })
     @ResponseStatus(HttpStatus.OK)
@@ -87,6 +90,7 @@ public class BucketController {
         return availableCountries;
     }
 
+    @Hidden
     @Operation(summary = "Get all Bucket details by date")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve all available Buckets and their details that match the given date",
@@ -109,7 +113,7 @@ public class BucketController {
         throw new BucketException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "date", date });
     }
 
-    @Operation(summary = "Get Bucket details by name")
+    /*@Operation(summary = "Get Bucket details by name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Retrieve the details of Bucket that matches the given ˇ",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BucketVo.class)) }),
@@ -118,7 +122,7 @@ public class BucketController {
             @ApiResponse(responseCode = "404", description = "No Bucket found with the given name",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.OK)*/
     @GetMapping("name/{name}")
     public BucketVo getauditDetailsById(@Parameter(description = "s3export-synchronization-batch.<country-name>.<yyyy-MM-dd>")
                                             @PathVariable String name) throws BucketException {

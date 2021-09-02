@@ -3,6 +3,7 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auf
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.error.AuftraegeSeedException;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.job.data.AuftraegeModelEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
@@ -24,7 +25,7 @@ public class AuftraegeSeedTask implements Tasklet, InitializingBean {
     private AuftraegeSeedWriter writer;
     private Integer batchSize;
 
-    @Value("${s3export.seed.batch.size:10}")
+    @Value("${s3export.seed.batch.size:50}")
     public void setBatchSize(Integer batchSize) {
         this.batchSize = batchSize;
     }
@@ -57,7 +58,9 @@ public class AuftraegeSeedTask implements Tasklet, InitializingBean {
         try {
             writer.write(entities);
         } catch (AuftraegeSeedException e) {
+            log.error("Failing auftraege seeding task on writing", e);
             jobExecution.addFailureException(e);
+            stepExecution.setExitStatus(new ExitStatus(ExitStatus.FAILED.getExitCode(), e.getMessage()));
         }
         return RepeatStatus.FINISHED;
     }

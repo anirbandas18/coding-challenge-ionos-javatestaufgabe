@@ -63,13 +63,13 @@ public class FileController implements TOABAuditService {
         return form;
     }
 
-    @Operation(summary = "Download content of latest file by country")
+    @Operation(summary = "Download latest customer data of a country as CSV file")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Downloaded content of the latest file by country",
+        @ApiResponse(responseCode = "200", description = "CSV file with the latest customer data for the country",
             content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = FileVo.class))) }),
         @ApiResponse(responseCode = "400", description = "File country is invalid",
             content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-        @ApiResponse(responseCode = "404", description = "No Files available with the given country",
+        @ApiResponse(responseCode = "404", description = "No customer data available for the given country",
             content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)
@@ -110,13 +110,13 @@ public class FileController implements TOABAuditService {
         throw new FileException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "country", country });
     }
 
-    @Operation(summary = "Download content of file for given date and country where date should be in format yyyy-MM-dd")
+    @Operation(summary = "Download customer data of a country as CSV file by date")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Downloaded content of the of the file matching the date and country",
+            @ApiResponse(responseCode = "200", description = "CSV file with customer data for the given the date and country",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = FileVo.class))) }),
             @ApiResponse(responseCode = "400", description = "File country/date is invalid",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) }),
-            @ApiResponse(responseCode = "404", description = "No Files available with the given country on specified date",
+            @ApiResponse(responseCode = "404", description = "No customer data available for the given country on specified date",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorVo.class)) })
     })
     @ResponseStatus(HttpStatus.OK)

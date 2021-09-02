@@ -36,6 +36,7 @@ public class UploadProcessor implements ItemProcessor<List<FileBucketDto>, List<
     public List<FileBucketDto> process(List<FileBucketDto> item) throws Exception {
         int count = 0;
         for(FileBucketDto fileBucketDto : item) {
+            log.debug("Checking existence of bucket {}", fileBucketDto.getBucketName());
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(fileBucketDto.getBucketName()).build());
             log.debug("Bucket: {} already exists: {}", fileBucketDto.getBucketName(), found);
             if (!found) {

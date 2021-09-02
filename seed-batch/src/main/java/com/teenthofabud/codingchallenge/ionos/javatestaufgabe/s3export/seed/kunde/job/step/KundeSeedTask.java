@@ -3,6 +3,7 @@ package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kun
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.error.KundeSeedException;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.job.data.KundeModelEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
@@ -58,7 +59,9 @@ public class KundeSeedTask implements Tasklet, InitializingBean {
         try {
             writer.write(entities);
         } catch (KundeSeedException e) {
+            log.error("Failing kunde seeding task on writing", e);
             jobExecution.addFailureException(e);
+            stepExecution.setExitStatus(new ExitStatus(ExitStatus.FAILED.getExitCode(), e.getMessage()));
         }
         return RepeatStatus.FINISHED;
     }

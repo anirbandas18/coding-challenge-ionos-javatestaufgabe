@@ -74,6 +74,9 @@ public class AuftraegeJobConfiguration {
     public Job auftraegeJob() {
         return jobBuilderFactory.get("auftraege-" + appName)
                 .start(auftraegeSeeding())
+                .on("FAILED").fail()
+                .on("*").end()
+                .build()
                 .build();
     }
 

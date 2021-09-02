@@ -40,6 +40,7 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
 
     private static final String FILE_EXTENSION_DELIMITTER = ".";
 
+    private Path storageBasePath;
     private List<FileBucketDto> fileNameLocationMap;
     private String fileNameDelimitter;
     private String fileExtension;
@@ -175,7 +176,8 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
         for(LandKundeAuftragCollectionVo csvFileDetails : landKundeAuftragVoList) {
             String bucketName = getBucketName(csvFileDetails.getLand(), csvFileDetails.getTimestamp());
             String csvFileName = getFileName(csvFileDetails.getLand(), csvFileDetails.getTimestamp());
-            Path csvFilePath = Paths.get(storeBaseLocation.toString(), csvFileDetails.getLand(), csvFileName);
+            //Path csvFilePath = Paths.get(storeBaseLocation.toString(), csvFileDetails.getLand(), csvFileName);
+            Path csvFilePath = Paths.get(storageBasePath.toString(), csvFileDetails.getLand(), csvFileName);
             Writer writer  = new StringWriter();
             StatefulBeanToCsv sbc = new StatefulBeanToCsvBuilder(writer)
                     .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
@@ -201,6 +203,14 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
         fileSdf = DateTimeFormatter.ofPattern(fileTimestampFormat);
         bucketSdf = DateTimeFormatter.ofPattern(bucketTimestampFormat);
         fileNameLocationMap = new LinkedList<>();
+        String userHome = System.getProperty("user.home");
+        storageBasePath = Paths.get(userHome, storeBaseLocation);
+        if(!Files.exists(storageBasePath)) {
+            storageBasePath = Files.createDirectories(storageBasePath);
+            log.info("Created storage base path {}", storageBasePath);
+        } else {
+            log.info("Storage base path {} already exists", storageBasePath);
+        }
     }
 
     public void destroy() throws Exception {

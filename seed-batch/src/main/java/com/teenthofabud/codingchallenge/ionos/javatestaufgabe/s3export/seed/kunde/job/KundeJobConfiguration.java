@@ -80,6 +80,9 @@ public class KundeJobConfiguration {
     public Job kundeJob() {
         return jobBuilderFactory.get("kunde-" + appName)
                 .start(kundeSeeding())
+                .on("FAILED").fail()
+                .on("*").end()
+                .build()
                 .build();
     }
 
