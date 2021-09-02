@@ -27,8 +27,8 @@ public class AuftraegeServiceClientExceptionHandler implements TOABFeignBaseExce
     private ObjectMapper om;
 
     @Override
-    public Optional<AuftraegeException> parseResponseToException(Response response) {
-        Optional<AuftraegeException> optEx = Optional.empty();
+    public Optional<AuftraegeModelException> parseResponseToException(Response response) {
+        Optional<AuftraegeModelException> optEx = Optional.empty();
         try {
             HttpStatus httpStatusCode = HttpStatus.resolve(response.status());
             InputStream rawErrorResponseBody = response.body().asInputStream();
@@ -38,7 +38,7 @@ public class AuftraegeServiceClientExceptionHandler implements TOABFeignBaseExce
                     || HttpStatus.CONFLICT.equals(httpStatusCode)
                     || HttpStatus.UNPROCESSABLE_ENTITY.equals(httpStatusCode)
                     || HttpStatus.INTERNAL_SERVER_ERROR.equals(httpStatusCode)) {
-                optEx = Optional.of(new AuftraegeException(errorDetails.getCode(), errorDetails.getMessage(), errorDetails.getDomain()));
+                optEx = Optional.of(new AuftraegeModelException(errorDetails.getCode(), errorDetails.getMessage(), errorDetails.getDomain()));
             } else if(HttpStatus.NOT_FOUND.equals(httpStatusCode)) {
                 // intentionally consume this as per business logic
                 log.debug("Auftraege Model not available, which is ok because the requested auftraege details are new and should not be available");

@@ -1,5 +1,8 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.job.step;
 
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.error.AuftraegeSeedException;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.error.SeedErrorCode;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.error.KundeSeedException;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.integration.data.KundeModelForm;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.integration.proxy.KundeServiceClient;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.job.converter.KundeModelEntity2FormConverter;
@@ -10,6 +13,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -49,7 +53,10 @@ public class KundeSeedWriter implements ItemWriter<KundeModelEntity>, Initializi
             KundeModelForm form = entity2FormConverter.convert(entity);
             String kundenId = kundeServiceCircuitBreaker.run(() -> client.postNewKundeModel(form),
                     throwable -> defaultPostNewKundeModel(form));
-            // TODO analyze kundenId to ascertain whether this an exception should be throw or not for skipping
+            if(StringUtils.isEmpty(StringUtils.trimWhitespace(kundenId))) {
+                log.error("Auftrage service not responsive");
+                throw new KundeSeedException(SeedErrorCode.SEED_ACTION_FAILURE, new Object[] { "Kunde service not responsive" });
+            }
             log.debug("POST {} to {} with kunden id {}", entity, form, kundenId);
             count++;
         }

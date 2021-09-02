@@ -1,8 +1,11 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.job.step;
 
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.error.AuftraegeSeedException;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.job.data.AuftraegeModelEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -26,7 +29,6 @@ public class AuftraegeSeedTask implements Tasklet, InitializingBean {
         this.batchSize = batchSize;
     }
 
-
     @Autowired
     public void setReader(AuftraegeSeedReader reader) {
         this.reader = reader;
@@ -44,13 +46,19 @@ public class AuftraegeSeedTask implements Tasklet, InitializingBean {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        StepExecution stepExecution = chunkContext.getStepContext().getStepExecution();
+        JobExecution jobExecution = stepExecution.getJobExecution();
         List<AuftraegeModelEntity> entities = new ArrayList<>(batchSize);
         for(int i = 0 ; i < batchSize ; i++) {
             AuftraegeModelEntity ae = reader.read();
             ae = processor.process(ae);
             entities.add(ae);
         }
-        writer.write(entities);
+        try {
+            writer.write(entities);
+        } catch (AuftraegeSeedException e) {
+            jobExecution.addFailureException(e);
+        }
         return RepeatStatus.FINISHED;
     }
 

@@ -8,13 +8,13 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class AuftraegeException extends TOABFeignException {
+public class AuftraegeModelException extends TOABFeignException {
 
-    public AuftraegeException(String errorCode, String errorMessage) {
+    public AuftraegeModelException(String errorCode, String errorMessage) {
         super(errorCode, errorMessage);
     }
 
-    public AuftraegeException(String errorCode, String errorMessage, String errorDomain) {
+    public AuftraegeModelException(String errorCode, String errorMessage, String errorDomain) {
         super(errorCode, errorMessage, errorDomain);
     }
 }

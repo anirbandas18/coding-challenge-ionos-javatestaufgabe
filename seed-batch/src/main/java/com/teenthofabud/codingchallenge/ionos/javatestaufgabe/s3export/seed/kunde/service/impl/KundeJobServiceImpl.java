@@ -1,7 +1,8 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.service.impl;
 
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.error.SeedErrorCode;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.kunde.service.KundeJobService;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.error.SeedException;
+import com.teenthofabud.core.common.error.TOABSystemException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -43,11 +44,11 @@ public class KundeJobServiceImpl implements KundeJobService {
 
     /**
      * Run a new instance of this functionality's core job called kunde every configured amount of time as per the cron expression
-     * @throws SeedException
+     * @throws TOABSystemException
      */
     @Scheduled(cron = "${s3export.seed.job.kunde.cron:0 */2 * * * ?}")
     @Override
-    public void runJob() throws SeedException {
+    public void runJob() throws TOABSystemException {
         try {
             Long synchronizationJobStartTime = System.currentTimeMillis();
             JobParameters synchronizationJobParameters =   new JobParametersBuilder()
@@ -55,14 +56,10 @@ public class KundeJobServiceImpl implements KundeJobService {
             log.info("Starting kunde job with parameters: {}", synchronizationJobParameters);
             JobExecution kundeJobExecution = jobLauncher.run(kundeJob, synchronizationJobParameters);
             batchRunCounter.incrementAndGet();
-        } catch (JobExecutionAlreadyRunningException e) {
-            throw new SeedException(e.getMessage());
-        } catch (JobRestartException e) {
-            throw new SeedException(e.getMessage());
-        } catch (JobInstanceAlreadyCompleteException e) {
-            throw new SeedException(e.getMessage());
-        } catch (JobParametersInvalidException e) {
-            throw new SeedException(e.getMessage());
+            log.info("{} job run number {}", kundeJobExecution.getJobInstance().getJobName(), batchRunCounter);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
+            log.error("Error executing kunde job", e);
+            throw new TOABSystemException(SeedErrorCode.SEED_ACTION_FAILURE, "Error executing kunde job", e);
         }
     }
 

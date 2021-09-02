@@ -60,6 +60,10 @@ import java.util.List;
 @Slf4j
 public class SynchronizationBatchConfiguration {
 
+    /**
+     * TODO https://stackoverflow.com/questions/18864162/how-to-retry-tasklet-in-spring-batch
+     */
+
     private String auftragKundeCollectionKeyName;
     private String kundeAuftragCollectionKeyName;
     private String bucketBaseUrl;

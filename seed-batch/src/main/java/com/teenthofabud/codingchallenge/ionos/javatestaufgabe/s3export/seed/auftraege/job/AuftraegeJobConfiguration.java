@@ -1,5 +1,6 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.job;
 
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.error.AuftraegeSeedException;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.job.step.AuftraegeSeedProcessor;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.job.step.AuftraegeSeedReader;
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.job.step.AuftraegeSeedTask;
@@ -19,15 +20,9 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class AuftraegeJobConfiguration {
 
-    private Integer batchSize;
     private String appName;
     private StepBuilderFactory stepBuilderFactory;
     private JobBuilderFactory jobBuilderFactory;
-
-    @Value("${s3export.seed.batch.auftraege.size:10}")
-    public void setBatchSize(Integer batchSize) {
-        this.batchSize = batchSize;
-    }
 
     @Value("${spring.application.name:seed-job}")
     public void setAppName(String appName) {

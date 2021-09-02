@@ -1,7 +1,8 @@
 package com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.service.impl;
 
 import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.auftraege.service.AuftraegeJobService;
-import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.error.SeedException;
+import com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.seed.error.SeedErrorCode;
+import com.teenthofabud.core.common.error.TOABSystemException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -43,11 +44,11 @@ public class AuftraegeJobServiceImpl implements AuftraegeJobService {
 
     /**
      * Run a new instance of this functionality's core job called auftraege every configured amount of time as per the cron expression
-     * @throws SeedException
+     * @throws TOABSystemException
      */
     @Scheduled(cron = "${s3export.seed.job.auftraege.cron:0 */1 * * * ?}")
     @Override
-    public synchronized void runJob() throws SeedException {
+    public synchronized void runJob() throws TOABSystemException {
         try {
             Long synchronizationJobStartTime = System.currentTimeMillis();
             JobParameters synchronizationJobParameters =   new JobParametersBuilder()
@@ -55,14 +56,10 @@ public class AuftraegeJobServiceImpl implements AuftraegeJobService {
             log.info("Starting auftraege job with parameters: {}", synchronizationJobParameters);
             JobExecution auftraegeJobExecution = jobLauncher.run(auftraegeJob, synchronizationJobParameters);
             batchRunCounter.incrementAndGet();
-        } catch (JobExecutionAlreadyRunningException e) {
-            throw new SeedException(e.getMessage());
-        } catch (JobRestartException e) {
-            throw new SeedException(e.getMessage());
-        } catch (JobInstanceAlreadyCompleteException e) {
-            throw new SeedException(e.getMessage());
-        } catch (JobParametersInvalidException e) {
-            throw new SeedException(e.getMessage());
+            log.info("{} job run number {}", auftraegeJobExecution.getJobInstance().getJobName(), batchRunCounter);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
+            log.error("Error executing auftraege job", e);
+            throw new TOABSystemException(SeedErrorCode.SEED_ACTION_FAILURE, "Error executing auftraege job", e);
         }
     }
 

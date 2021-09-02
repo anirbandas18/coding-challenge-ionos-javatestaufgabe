@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export</groupId>
+        <artifactId>s3export-tool</artifactId>
+        <version>2.2.0-RELEASE</version>
+        <!--<relativePath/>-->
+    </parent>
+
+    <properties>
+        <start-class>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.naming.NamingServiceApplication</start-class>
+        <service.prefix>naming</service.prefix>
+    </properties>
+
+    <artifactId>s3export-naming-service</artifactId>
+    <version>2.2.0-RELEASE</version>
+    <packaging>jar</packaging>
+    <name>${service.prefix}-service</name>
+
+    <build>
+        <finalName>${service.prefix}-app-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <to>
+                        <image>docker.io/teenthofabud/${project.artifactId}:${project.version}</image>
+                    </to>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <jvmArguments>
+                        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6003
+                    </jvmArguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
