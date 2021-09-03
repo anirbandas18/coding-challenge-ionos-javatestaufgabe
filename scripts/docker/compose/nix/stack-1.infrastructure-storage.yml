@@ -5,20 +5,22 @@ services:
   rdbms-service:
     image: mysql:8.0.22
     container_name: rdbms-service
+    hostname: rdbms-service
     restart: always
     user: mysql
     command: --default-authentication-plugin=mysql_native_password --init-file="/tmp/database/s3export.sql"
     environment:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
-      - /var/folders/ionos-javatestaufgabe-s3export/data/mysql:/var/lib/mysql/data
-      - ./scripts/database/mysql/docker/s3export.sql:/tmp/database/s3export.sql
+      - $HOME/ionos-coding-challenge/s3export-tool/data/mysql:/var/lib/mysql/data
+      - ../../../database/mysql/docker/s3export.sql:/tmp/database/s3export.sql
     ports:
       - 3306:3306
 
   cache-service:
     image: redis:3.0.5
     container_name: cache-service
+    hostname: cache-service
     restart: always
     ports:
       - 6379:6379
@@ -26,9 +28,10 @@ services:
   object-storage-service:
     image: minio/minio:RELEASE.2021-08-31T05-46-54Z.fips
     container_name: object-storage-service
+    hostname: object-storage-service
     restart: always
     command: server --console-address ":4444" /home/shared
     volumes:
-      - /var/folders/ionos-javatestaufgabe-s3export/data/minio
+      - $HOME/ionos-coding-challenge/s3export-tool/data/minio:/home/shared
     ports:
       - 9000:9000

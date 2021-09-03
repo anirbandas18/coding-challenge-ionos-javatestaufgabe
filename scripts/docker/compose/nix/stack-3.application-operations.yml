@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+
+  naming-service:
+    image: teenthofabud/s3export-naming-service:2.5.6-SNAPSHOT
+    container_name: naming-service
+    hostname: naming-service
+    restart: on-failure
+    volumes:
+        - $HOME/ionos-coding-challenge/s3export-tool/naming-service:/opt/ionos-javatestaufgabe-s3export/s3export-naming-service
+    ports:
+      - 8761:8761
+    environment:
+      - NAMING_LOGSTASH_ENABLED=true
+      - LOGBACK_LOGGING_LEVEL=info
+      - NAMING_LOGSTASH_HOST=localhost
+      - NAMING_LOGSTASH_PORT=4560
+
+  configuration-service:
+    image: teenthofabud/s3export-configuration-service:2.5.6-SNAPSHOT
+    container_name: configuration-service
+      hostname: configuration-service
+      restart: on-failure
+      volumes:
+        - $HOME/ionos-coding-challenge/s3export-tool/configuration-service:/opt/ionos-javatestaufgabe-s3export/s3export-configuration-service
+    ports:
+      - 8888:8888
+    environment:
+      - CONFIGURATION_LOGSTASH_ENABLED=true
+      - LOGBACK_LOGGING_LEVEL=info
+      - CONFIGURATION_LOGSTASH_HOST=localhost
+      - CONFIGURATION_LOGSTASH_PORT=4560
+      - CONFIGURATION_BASE_DIR="$HOME"

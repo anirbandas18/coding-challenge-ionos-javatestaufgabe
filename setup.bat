@@ -1,0 +1,15 @@
+mkdir %userprofile%\\ionos-coding-challenge
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\data
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\data\\minio
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\data\\elasticsearch
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\data\\mysql
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\data\\minio
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\synchronization-batch
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\seed-batch
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\download-service
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\auftraege-service
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\kunde-service
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\gateway-service
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\naming-service
+mkdir %userprofile%\\ionos-coding-challenge\\s3export-tool\\configuration-service
