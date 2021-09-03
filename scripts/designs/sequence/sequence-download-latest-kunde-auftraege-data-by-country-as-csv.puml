@@ -1,0 +1,39 @@
+@@startuml
+
+title Download latest Kunde Auftraege data by country as CSV
+
+box "client"
+    actor User as U
+end box
+
+box "download-service"
+    boundary Download as D
+end box
+
+box "object-store-service"
+    collections ObjectStore as S3
+end box
+
+
+U -> D: GET /download/file/country/{country}
+D -> S3: list buckets
+S3 -> D: List<Bucket>
+D -> D: Filter List<Bucket> by country
+D -> D: Sort(filtered List<Bucket>)\nby date descending
+D -> D: get top most element\n of filtered List<Bucket>
+D -> D: The top most element\nrepresents the latest bucket\nfor the country
+D -> S3: list objects by bucket name
+S3 -> D: Iterable<Result<Item>>
+loop forEach(Result<Item>)
+    D -> D: Convert to Item to FileDetailEntity
+    D -> D: append FileDetailEntity to collection
+end
+D -> D: Sort(List<FileDetailEntity>)\nby date descending
+D -> D: get top most element\n of filtered List<FileDetailEntity>
+D -> D: The top most element\nrepresents the latest object\nfor the country
+D -> S3: get object by bucket name and object name
+S3 -> D: InputStream
+D -> D: InputStream to byte[]
+D -> D: FileVo = byte[], fileName = object.name
+D -> U: byte[], CONTENT-DISPOSITION=fileName
+@enduml

@@ -1,0 +1,27 @@
+@@startuml
+
+title Get list of all available countries
+
+box "client"
+    actor User as U
+end box
+
+box "download-service"
+    boundary Download as D
+end box
+
+box "object-store-service"
+    collections ObjectStore as S3
+end box
+
+
+U -> D: GET /download/bucket/country
+D -> S3: list buckets
+S3 -> D: List<Bucket>
+loop forEach(Bucket)
+    D -> D: Parse bucket name to get country name
+    D -> D: Append country name to collection
+end
+D -> U: Array of country names
+
+@enduml

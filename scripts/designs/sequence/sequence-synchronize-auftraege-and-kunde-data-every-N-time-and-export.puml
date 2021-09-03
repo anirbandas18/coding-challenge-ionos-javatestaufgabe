@@ -1,0 +1,45 @@
+@@startuml
+
+title Synchronize Auftraege and Kunde data for the past N time (viz., 5 second or 30 minute or 1 hour) and Export
+
+box "auftraege-service"
+    boundary Auftraege as A
+end box
+
+box "kunde-service"
+    boundary Kunde as K
+end box
+
+box "synchronization-batch"
+    control SynchronizationJob as SJ
+    control SynchronizationJobService as SJS
+end box
+
+box "object-store-service"
+    collections ObjectStore as S3
+end box
+
+SJS -> SJ: Start job instance
+||35||
+group Filtering Step
+    SJ -> A: GET /auftraege/model/range?timeUnit=minute&timeAmount=5
+    A -> SJ: List<AuftraegeModelVo>
+end
+group Mapping Step
+    SJ -> SJ: Get kundenId from Auftraege
+    SJ -> K: GET /kunde/model/kundenid/{kundenId}
+    K -> SJ: KundeModelVo
+    SJ -> SJ: Map Kunde to Auftraege
+end
+group Segmentation Step
+    SJ -> SJ: Group each Kunde-Auftraege\nmapping by Kunde Land
+    SJ -> SJ: Create CSV file for each group\nof Kunde-Auftraege by Land
+end
+group Upload Step
+    SJ -> S3: Create bucket with Land and Date
+    SJ -> S3: Upload CSV file to respective bucket
+end
+||35||
+SJ -> SJS: Exit job instance
+
+@enduml

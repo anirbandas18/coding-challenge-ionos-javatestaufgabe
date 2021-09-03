@@ -66,14 +66,10 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 4.  Execute `docker-compose -f docker-compose.core.yml down` at the root folder containing all the projects to kill the containers of the core microservices
 
 ---
-### INSTALLATION VIDEO
-[Click here to see](https://vimeo.com/527056232)
-
----
 ### FEATURES
 1. Get the list of available countries
 2. Download the latest customer data for a country
-2. Download the customer data of a country for a given date in CSV format
+2. Download the customer data of a country in CSV format
 3. Error reporting with codes and descriptive messages 
 
 ---
@@ -91,17 +87,14 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 
 ---
 ### BUSINESS FLOWS SEQUENCES
-[Synchronize and export kunde and auftraege data every N time](https://ibb.co/SmCzw4V)
-![Synchronize and export kunde and auftraege data every N time](out/data/designs/sequence-get-strategic-polygon-with-enclosed-cars/Get strategic polygon by its Id and the cars it encloses.png)
+[Synchronize and export kunde and auftraege data every N time](https://i.ibb.co/5YvhCwZ/sequence-synchronize-auftraege-and-kunde-data-every-N-time-and-export-Synchronize-Auftraege-and-Kund.png)
+![Synchronize and export kunde and auftraege data every N time](scripts/designs/sequence/sequence-synchronize-auftraege-and-kunde-data-every-N-time-and-export-Synchronize_Auftraege_and_Kunde_data_for_the_past_N_time__viz___5_second_or_30_minute_or_1_hour__and_Export.png)
 
-[Get list of all countries](https://ibb.co/xmHB79B)
-![Get list of all countries](out/data/designs/sequence-get-strategic-polygons-and-their-enclosed-cars/Get strategic polygons with matching name and the cars each of it encloses.png)
+[Get list of all countries](https://i.ibb.co/L1RW4QY/sequence-get-list-of-all-available-countires-Get-list-of-all-available-countries.png)
+![Get list of all countries](scripts/designs/sequence/sequence-get-list-of-all-available-countires-Get_list_of_all_available_countries.png)
 
-[Download kunde and auftraege data by counrty](https://ibb.co/xmHB79B)
-![Download kunde and auftraege data by counrty](out/data/designs/sequence-get-strategic-polygons-and-their-enclosed-cars/Get strategic polygons with matching name and the cars each of it encloses.png)
-
-[Download kunde and auftraege data by counrty and date](https://ibb.co/xmHB79B)
-![Download kunde and auftraege data by counrty and date](out/data/designs/sequence-get-strategic-polygons-and-their-enclosed-cars/Get strategic polygons with matching name and the cars each of it encloses.png)
+[Download latest kunde and auftraege data by country](https://i.ibb.co/FY5KdG8/sequence-download-latest-kunde-auftraege-data-by-country-as-csv-Download-latest-Kunde-Auftraege-data.png)
+![Download kunde and auftraege data by country](scripts/designs/sequence/sequence-download-latest-kunde-auftraege-data-by-country-as-csv-Download_latest_Kunde_Auftraege_data_by_country_as_CSV.png)
 
 ---
 ### PROJECT DESCRIPTION
