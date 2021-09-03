@@ -38,7 +38,7 @@ public class FilteringReader implements ItemReader<List<AuftraegeModelVo>>, Init
         this.synchronizationIntervalAmount = synchronizationIntervalAmount;
     }
 
-    @Value("${s3export.sync.interval.unit:hour}")
+    @Value("${s3export.sync.interval.unit:minute}")
     public void setSynchronizationIntervalUnit(String synchronizationIntervalUnit) {
         this.synchronizationIntervalUnit = synchronizationIntervalUnit;
     }

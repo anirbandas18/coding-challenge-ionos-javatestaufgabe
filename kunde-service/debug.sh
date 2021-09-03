@@ -1,2 +1,2 @@
 #!/usr/bin/env zsh
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6444 -jar target/kunde-app-2.5.0-SNAPSHOT.jar
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6444 -jar -DSPRING_PROFILES_ACTIVE=development -DLOGBACK_LOGGING_LEVEL=debug -DSPRING_CLOUD_CONFIG_ENABLED=true -DLOGSTASH_HOST=localhost -DLOGSTASH_PORT=4560 -DSPRING_CLOUD_CONFIG_HOST=localhost -DSPRING_CLOUD_CONFIG_PORT=8888 -DKUNDE_LOGGING_LEVEL=DEBUG -DKUNDE_SHOW_SQL=true -DKUNDE_SHOW_SQL=true -DKUNDE_SQL_COMMENTS=true -DKUNDE_FORMAT_SQL=true -DKUNDE_DATABASE_HOST=localhost -DKUNDE_DATABASE_PORT=3306 -DKUNDE_EUERKA_HOST=localhost -DKUNDE_EUREKA_PORT=8761 -DKUNDE_ZIPKIN_HOST=localhost -DKUNDE_ZIPKIN_PORT=9411 target/kunde-app.jar

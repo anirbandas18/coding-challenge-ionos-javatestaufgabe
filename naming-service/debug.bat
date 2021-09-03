@@ -1,1 +1,1 @@
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6777 -jar target/naming-app-2.5.0-SNAPSHOT.jar
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6777 -jar -DNAMING_LOGSTASH_ENABLED=true -DLOGBACK_LOGGING_LEVEL=debug -DNAMING_LOGSTASH_HOST=localhost -DNAMING_LOGSTASH_PORT=4560 target/naming-app.jar

@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export</groupId>
         <artifactId>s3export-tool</artifactId>
-        <version>2.5.4-RELEASE</version>
+        <version>2.5.6-SNAPSHOT</version>
         <!--<relativePath/>-->
     </parent>
 
@@ -18,12 +18,12 @@
     </properties>
 
     <artifactId>s3export-download-service</artifactId>
-    <version>2.5.4-RELEASE</version>
+    <version>2.5.6-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
 
     <build>
-        <finalName>${service.prefix}-app-${project.version}</finalName>
+        <finalName>${service.prefix}-app</finalName>
         <plugins>
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
@@ -40,7 +40,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <jvmArguments>
-                        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6003
+                        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6333
                     </jvmArguments>
                 </configuration>
             </plugin>

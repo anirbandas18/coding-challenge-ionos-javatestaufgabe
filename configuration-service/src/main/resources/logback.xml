@@ -61,7 +61,7 @@
     </root>
 
     <!-- LOG integration at TRACE level -->
-    <logger name="com.teenthofabud.laundromat.infrastructure.configuration" level="debug" additivity="false">
+    <logger name="com.teenthofabud.laundromat.infrastructure.configuration" level="${logback.logging.level}" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
         <if condition='${logstash.enabled} == true'>
@@ -71,7 +71,7 @@
         </if>
     </logger>
 
-    <logger name="logging.level.org.hibernate.SQL" level="debug">
+    <logger name="logging.level.org.hibernate.SQL" level="${logback.logging.level}">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </logger>

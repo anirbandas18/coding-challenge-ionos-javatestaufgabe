@@ -16,12 +16,20 @@ select kundeid,
 TIMESTAMPDIFF(hour, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) as diff_utc, 
 TIMESTAMPDIFF(hour, current_timestamp(), str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) as diff_server,
 lastchange,
-convert_tz(str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000'), '+00:00', @@session.time_zone),
+convert_tz(str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000'), '+00:00', @@session.time_zone) as last_change_to_server_time_zone,
 TIMESTAMPDIFF(hour, current_timestamp(), convert_tz(str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000'), '+00:00', @@session.time_zone)) as diff_server
-from s3export_sync_db.auftraege where TIMESTAMPDIFF(hour, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) <= 99;
+from S3EXPORT_AUFTRAEGE_DB.auftraege where TIMESTAMPDIFF(second, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) between 0 and 10;
+
+select kundeid, 
+TIMESTAMPDIFF(hour, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) as diff_utc, 
+TIMESTAMPDIFF(hour, current_timestamp(), str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) as diff_server,
+lastchange,
+convert_tz(str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000'), '+00:00', @@session.time_zone) as last_change_to_server_time_zone,
+TIMESTAMPDIFF(hour, current_timestamp(), convert_tz(str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000'), '+00:00', @@session.time_zone)) as diff_server
+from S3EXPORT_AUFTRAEGE_DB.auftraege where TIMESTAMPDIFF(minute, current_timestamp(), convert_tz(str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000'), '+00:00', @@session.time_zone)) between 0 and 2;
 
 select * from s3export_sync_db.auftraege where TIMESTAMPDIFF(hour, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) <= 99;
 select * from s3export_sync_db.auftraege where TIMESTAMPDIFF(minute, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) <= 99;
 
 
-select * from s3export_sync_db.auftraege where TIMESTAMPDIFF(hour, current_timestamp(), str_to_date(lastchange, '%Y-%M-%DT%H:%i:%S')) <= 3;
+select * from s3export_auftraege_db.auftraege where TIMESTAMPDIFF(second, current_timestamp(), str_to_date(lastchange, '%Y-%M-%DT%H:%i:%S')) between 0 and 3;

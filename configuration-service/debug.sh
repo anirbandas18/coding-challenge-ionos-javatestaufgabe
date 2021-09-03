@@ -1,2 +1,2 @@
 #!/usr/bin/env zsh
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6222 -jar target/configuration-app-2.5.0-SNAPSHOT.jar
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6222 -jar -DCONFIGURATION_LOGSTASH_ENABLED=true -DLOGBACK_LOGGING_LEVEL=debug -DCONFIGURATION_LOGSTASH_HOST=localhost -DCONFIGURATION_LOGSTASH_PORT=4560 -DCONFIGURATION_BASE_DIR=/Users/anirban.das target/configuration-app.jar

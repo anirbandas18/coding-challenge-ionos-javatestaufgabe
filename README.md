@@ -1,5 +1,9 @@
 # JAVA EXERCISE
 
+s3export.germany.2021-09-03
+
+germany+2021-09-3_12-09-56.csv
+
 ---
 ### PREFACE
 I had a lot of fun in completing this exercise because of the wide variety of topics that it covers ranging from architecture to system design to data analysis and modelling to considering performance and automating deployments. It was indeed a pleasure for me to have been offered this challenge as it tested my knowledge, and skills while giving me an idea on the kind of work that IONOS does.
@@ -193,6 +197,8 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 10. Enable authentication of redis cache server 
 11. Encrypt security credentials in configuration store
 12. Synchronize sequential bootstrap for each service and batch as per service dependency order across all microservices of this project within docker-compose
+
+
 
 ---
 ### ADDITIONAL RESOURCES

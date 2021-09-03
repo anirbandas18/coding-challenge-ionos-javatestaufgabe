@@ -63,18 +63,18 @@
     <if condition='&quot;${spring.profiles.active}&quot;.equals(&quot;local&quot;)'>
         <then>
 
-            <logger name="com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.auftraege" level="info" additivity="false">
+            <logger name="com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.auftraege" level="${logback.logging.level}" additivity="false">
                 <appender-ref ref="RollingFile" />
                 <appender-ref ref="Console" />
                 <appender-ref ref="Stash" />
             </logger>
 
-            <logger name="logging.level.org.hibernate.SQL" level="info">
+            <logger name="logging.level.org.hibernate.SQL" level="${logback.logging.level}">
                 <appender-ref ref="RollingFile" />
                 <appender-ref ref="Console" />
             </logger>
 
-            <logger name="logging.level.org.hibernate.type.descriptor.sql.BasicBinder" level="info">
+            <logger name="logging.level.org.hibernate.type.descriptor.sql.BasicBinder" level="trace">
                 <appender-ref ref="RollingFile" />
                 <appender-ref ref="Console" />
             </logger>
@@ -84,12 +84,12 @@
 
     <if condition='&quot;${spring.profiles.active}&quot;.equals(&quot;development&quot;)'>
         <then>
-            <logger name="com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.auftraege" level="info" additivity="false">
+            <logger name="com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.auftraege" level="${logback.logging.level}" additivity="false">
                 <appender-ref ref="RollingFile" />
                 <appender-ref ref="Console" />
             </logger>
 
-            <logger name="logging.level.org.hibernate.SQL" level="debug">
+            <logger name="logging.level.org.hibernate.SQL" level="${logback.logging.level}">
                 <appender-ref ref="RollingFile" />
                 <appender-ref ref="Console" />
             </logger>
