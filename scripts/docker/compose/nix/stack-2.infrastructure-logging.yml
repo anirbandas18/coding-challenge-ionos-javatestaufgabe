@@ -6,9 +6,9 @@ services:
     image: logstash:7.14.0
     container_name: logstash-service
     restart: always
+    command: -f /tmp/config/logstash.conf
     volumes:
-      - ../../../scripts/configuration/logstash/logstash-s3export.yml:/usr/share/logstash/config/logstash.yml
-      - ../../../scripts/configuration/logstash/logstash-s3export.conf:/usr/share/logstash/config/logstash.conf
+      - ../../../configuration/logstash/logstash-s3export.conf:/tmp/config/logstash.conf
     ports:
       - 4560:4560
 
