@@ -1,0 +1,83 @@
+@startuml
+
+title "Component - S3EXPORT Synchronization Batch"
+
+node "Synchronization Job" {
+
+    frame "Filtering Step" {
+
+        package "Filtering Task" {
+
+            [Filtering Reader] as filteringReader
+            [Filtering Processor] as filteringProcessor
+            [Filtering Writer] as filteringWriter
+
+            filteringProcessor ..> filteringReader
+            filteringReader ..> filteringWriter
+
+        }
+
+    }
+
+    frame "Mapping Step" {
+
+        package "Mapping Task" {
+
+            [Mapping Reader] as mappingReader
+            [Mapping Processor] as mappingProcessor
+            [Mapping Writer] as mappingWriter
+
+            mappingReader ..> mappingProcessor
+            mappingProcessor ..> mappingWriter
+
+        }
+
+    }
+
+    frame "Segmentation Step" {
+
+        package "Segmentation Task" {
+
+            [Segmentation Reader] as segmentationReader
+            [Segmentation Processor] as segmentationProcessor
+            [Segmentation Writer] as segmentationWriter
+
+            segmentationReader ..> segmentationProcessor
+            segmentationProcessor ..> segmentationWriter
+
+        }
+
+    }
+
+    frame "Upload Step" {
+
+        package "Upload Task" {
+
+            [Upload Reader] as uploadReader
+            [Upload Processor] as uploadProcessor
+            [Upload Writer] as uploadWriter
+
+            uploadReader ..> uploadProcessor
+            uploadProcessor ..> uploadWriter
+
+        }
+    }
+
+    SynchronizationJobStart ..> filteringProcessor
+    filteringWriter ..> mappingReader
+    mappingWriter ..> segmentationReader
+    segmentationWriter ..> uploadReader
+    uploadWriter ..> SynchronizationJobEnd
+
+}
+
+[Synchronization Job Service] as synchronizationJobService
+
+note top of synchronizationJobService
+    Synchronization Job Service is scheduled
+    to execute Synchronization Job periodically
+end note
+
+synchronizationJobService ..> SynchronizationJobStart
+
+@enduml

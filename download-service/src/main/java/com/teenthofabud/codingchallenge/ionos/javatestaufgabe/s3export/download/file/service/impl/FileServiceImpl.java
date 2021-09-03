@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -24,6 +25,10 @@ import java.util.*;
 @Component
 @Slf4j
 public class FileServiceImpl implements FileService, InitializingBean {
+
+    private static final Comparator<FileDetailEntity> CMP_BY_DATE_DESC = (s1, s2) -> {
+        return s1.getDateTime().compareTo(s2.getDateTime());
+    };
 
     private FileRepository repository;
     private FileEntity2VoConverter entity2VoConverter;
@@ -118,14 +123,24 @@ public class FileServiceImpl implements FileService, InitializingBean {
         String bucketName = bucketForCountryOnDate.getName();
         log.info("Bucket available for country {} on date {} as {}", country, date, bucketName);
         List<FileDetailEntity> fileDetailEntities = repository.findAllReferencesBy(bucketForCountryOnDate.getName());
-        LocalDateTime localDateTime = LocalDateTime.parse(date, dtf);
+
+        if(fileDetailEntities == null || fileDetailEntities.isEmpty()) {
+            log.error("No file reference available for country {} on date {}", country, date);
+            throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND,
+                    "no file reference available for country on the given date", new Object [] { "country: " + country, "date: " + date });
+        }
+        Collections.sort(fileDetailEntities, CMP_BY_DATE_DESC);
+
+        /*LocalDateTime localDateTime = LocalDateTime.parse(date, dtf);
         Optional<FileDetailEntity> optionalFileDetailEntity = fileDetailEntities.stream().filter(f -> f.getDateTime().isEqual(localDateTime)).findFirst();
         if(optionalFileDetailEntity.isEmpty()) {
             log.error("No file reference available for country {} on date {}", country, date);
             throw new FileException(DownloadErrorCode.DOWNLOAD_NOT_FOUND,
                     "no file reference available for country on the given date", new Object [] { "country: " + country, "date: " + date });
         }
-        FileDetailEntity fileDetailEntity = optionalFileDetailEntity.get();
+        FileDetailEntity fileDetailEntity = optionalFileDetailEntity.get();*/
+
+        FileDetailEntity fileDetailEntity = fileDetailEntities.get(0);
         log.info("File details available for country {} on date {} as {}", country, date, fileDetailEntity.getName());
         Optional<FileEntity> fileEntityOptional = repository.findContentBy(bucketName, fileDetailEntity.getName());
         if(fileEntityOptional.isEmpty()) {

@@ -6,17 +6,19 @@
     <parent>
         <groupId>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export</groupId>
         <artifactId>s3export-tool</artifactId>
-        <version>2.5.0-SNAPSHOT</version>
+        <version>2.5.4-RELEASE</version>
         <!--<relativePath/>-->
     </parent>
 
     <properties>
         <start-class>com.teenthofabud.codingchallenge.ionos.javatestaufgabe.s3export.download.DownloadServiceApplication</start-class>
         <service.prefix>download</service.prefix>
+        <aws.version>1.12.15</aws.version>
+        <aws-v2.version>2.16.93</aws-v2.version>
     </properties>
 
     <artifactId>s3export-download-service</artifactId>
-    <version>2.5.0-SNAPSHOT</version>
+    <version>2.5.4-RELEASE</version>
     <packaging>jar</packaging>
     <name>${service.prefix}-service</name>
 
@@ -47,6 +49,18 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${opencsv.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>${javafaker.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.teenthofabud.core.common</groupId>
             <artifactId>toab-chassis-sdk</artifactId>
             <version>${toab-chassis-sdk.version}</version>
@@ -76,6 +90,24 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>${aws.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${aws-v2.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
+            <version>${aws-v2.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

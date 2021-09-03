@@ -1,0 +1,41 @@
+@@startuml
+
+title Get strategic polygons with matching name and the cars each of it encloses
+
+box "client"
+    actor User as U
+end box
+
+box "gateway-service"
+    boundary Gateway as G
+end box
+
+
+box "position-service"
+    control Position as POS
+end box
+
+box "car-service"
+    collections Car as C
+end box
+
+box "polygon-service"
+    collections Polygon as PLY
+end box
+
+U -> G: GET /position-service/position/search/polygon/name/{name}
+G -> POS: GET /position/search/polygon/name/{name}
+POS -> PLY: GET /polygon/search/name/{name}
+PLY -> POS: List<StrategicPolygonDetailedDTO>
+||25||
+POS -> C: GET /car/search
+C -> POS: List<CarDetailsDTO>
+loop forEach StrategicPolygonDetailedDTO
+    POS -> POS: Business logic to locate all cars within the current strategic polygon
+    POS -> POS: Add matching result into List<StrategicPolygon2CarPositioningVO>
+end loop
+POS -> G: List<StrategicPolygon2CarPositioningVO>
+G -> U: collection of strategic polygon : list of car mappings
+
+
+@@enduml

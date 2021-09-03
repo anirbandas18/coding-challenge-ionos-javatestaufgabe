@@ -135,15 +135,20 @@ public class BucketServiceImpl implements BucketService, InitializingBean {
     @Override
     public BucketVo retrieveForCountryOnDate(String country, String date) throws BucketException {
         List<BucketEntity> filteredBuckets = searchByCountry(country);
-        LocalDate localDate = LocalDate.parse(date, dtf);
-        Optional<BucketEntity> optionalBucketEntity = filteredBuckets.stream().filter(b -> b.getDate().isEqual(localDate)).findFirst();
-        if(optionalBucketEntity.isEmpty()) {
-            log.error("No buckets available for country {} on date {}", country, date);
-            throw new BucketException(DownloadErrorCode.DOWNLOAD_NOT_FOUND, new Object[] { "country: " + country, "date: " + date });
+        try {
+            LocalDate localDate = LocalDate.parse(date, dtf);
+            Optional<BucketEntity> optionalBucketEntity = filteredBuckets.stream().filter(b -> b.getDate().isEqual(localDate)).findFirst();
+            if(optionalBucketEntity.isEmpty()) {
+                log.error("No buckets available for country {} on date {}", country, date);
+                throw new BucketException(DownloadErrorCode.DOWNLOAD_NOT_FOUND, new Object[] { "country: " + country, "date: " + date });
+            }
+            BucketVo bucketVo = entity2VoConverter.convert(optionalBucketEntity.get());
+            log.info("Retrieved {} as latest bucket for country {} on date {}", bucketVo, country, date);
+            return bucketVo;
+        } catch (DateTimeParseException e) {
+            log.error("Invalid date {}", date);
+            throw new BucketException(DownloadErrorCode.DOWNLOAD_ATTRIBUTE_INVALID, new Object[] { "date", date });
         }
-        BucketVo bucketVo = entity2VoConverter.convert(optionalBucketEntity.get());
-        log.info("Retrieved {} as latest bucket for country {} on date {}", bucketVo, country, date);
-        return bucketVo;
     }
 
     @Override

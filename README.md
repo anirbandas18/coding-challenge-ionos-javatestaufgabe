@@ -78,46 +78,19 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 
 ---
 ### ARCHITECTURE
-[Click here to see](https://ibb.co/mv9hGyW)
-![Click here to see](data/designs/architecture-sharenow-coding-challenge.png)
+[Click here to see](https://i.ibb.co/6RW1HRQ/s3export-tool-architecture.png)
+![Click here to see](scripts/designs/deployment/s3export-tool-architecture.png)
 
 ---
-### COMPONENT DIAGRAM
-[kunde-service](https://ibb.co/L6NjMjj)
-![kunde-service](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
+### COMPONENTS
+[synchronization-batch](https://i.ibb.co/HrfM69k/component-synchronization-batch-Component-S3-EXPORT-Synchronization-Batch.png)
+![synchronization-batch](scripts/designs/component/component-synchronization-batch-Component___S3EXPORT_Synchronization_Batch.png)
 
-[auftraege-service](https://ibb.co/L6NjMjj)
-![auftraege-service](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
-
-[seed-batch](https://ibb.co/L6NjMjj)
-![seed-batch](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
-
-[synchronization-batch](https://ibb.co/L6NjMjj)
-![synchronization-service](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
-
-[download-service](https://ibb.co/L6NjMjj)
-![download-service](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
+[download-service](https://i.ibb.co/x3wrwLs/component-download-service-Component-S3-EXPORT-Download-Service.png)
+![download-service](scripts/designs/component/component-download-service-Component___S3EXPORT_Download_Service.png)
 
 ---
-### SEQUENCE DIAGRAMS
-[Kunde data search](https://ibb.co/L6NjMjj)
-![Kunde data search](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
-
-[Kunde data creation](https://ibb.co/L6NjMjj)
-![Kunde data creation](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
-
-[Kunde data seeding](https://ibb.co/L6NjMjj)
-![Kunde data seeding](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
-
-[Auftraege data search](https://ibb.co/L6NjMjj)
-![Auftraege data search](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
-
-[Auftraege data creation](https://ibb.co/L6NjMjj)
-![Auftraege data creation](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
-
-[Auftraege data seeding](https://ibb.co/L6NjMjj)
-![Auftraege data seeding](out/data/designs/sequence-get-car-with-enclosing-strategic-polygon/Get car by VIN and its enclosing strategic polygon.png)
-
+### BUSINESS FLOWS SEQUENCES
 [Synchronize and export kunde and auftraege data every N time](https://ibb.co/SmCzw4V)
 ![Synchronize and export kunde and auftraege data every N time](out/data/designs/sequence-get-strategic-polygon-with-enclosed-cars/Get strategic polygon by its Id and the cars it encloses.png)
 
@@ -182,6 +155,7 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 5. No file will be available for download if no eligible data is found for export activity during the last N time by Synchronization Batch
 6. Error message will be returned if there is request to download using an unavailable country, wrong dat-time format or without a user sequence value
 7. Downloaded CSV file name has the format: `'country'+'yyyy-MM-dd_HH-mm-ss'+'.csv'`
+8. A positive whole number should be provided as a user sequence value for downloading customer data as CSV files in order to ascertain a minimum level of integrity of the calling client 
 
 ---
 ### TECHNICAL DECISIONS
@@ -210,7 +184,7 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 ### REST API DOCUMENTATION
 | SERVICE-NAME | API DOCUMENTATION URL |
 | ----------- | ----------- |
-| download-service | http://<GATEWAY-SERVICE-IP/GATEWAY-SERVICE-HOST>:8081/download/swagger-ui.html) |
+| download-service | http://<GATEWAY-SERVICE-IP or GATEWAY-SERVICE-HOST>:8081/download/swagger-ui.html) |
 
 ---
 ### BACKLOG
@@ -218,20 +192,15 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 2. download-service to track details of available countries and uploaded files for a date in a database rather than directly querying the object storage
 3. Event based communication between synchronization-batch and download-service to exchange uploaded file details via publish-subscribe model
 4. Implement retry logic in synchronization-batch
-5. Implement circuit breaker in gateway-service for all exposed services along with their dedicated fallbacks
-6. Health monitoring dashboard for all web services and batch jobs 
-7. Block direct access to all web services and batch jobs, except through gateway
-8. Enable security on all infrastructure services and core microservices
-9. Enable authentication of redis cache server 
-10. Encrypt security credentials in configuration store
-11. Synchronize sequential bootstrap for each service and batch as per service dependency order across all microservices of this project within docker-compose
+5. Better bucket and object management logic within object storage 
+6. Implement circuit breaker in gateway-service for all exposed services along with their dedicated fallbacks
+7. Health monitoring dashboard for all web services and batch jobs 
+8. Block direct access to all web services and batch jobs, except through gateway
+9. Enable security on all infrastructure services and core microservices
+10. Enable authentication of redis cache server 
+11. Encrypt security credentials in configuration store
+12. Synchronize sequential bootstrap for each service and batch as per service dependency order across all microservices of this project within docker-compose
 
 ---
 ### ADDITIONAL RESOURCES
 1. In the `scripts` folder under the root folder `s3export-tool` you will find the database scripts, docker compose files and logstash configuration corresponding to this microservice setup
-
----
-### TROUBLESHOOTING
-1. If you are facing docker network issues while running the docker compose files, execute `docker system prune` to reset the networks
-2. The docker image builds that take place via maven can create additional images that take up space in your file system but are not tagged with any name or tag because when you run `docker images` you will see there are images with <none> as image name and image tag. Use `docker rmi <list of image ids>` to clear such orphan images
-3. If you are facing issues in bring up mongodb docker container (documentdb-service) due to a permission error where /adata/db is locked within the container, change the host value of volume option under documentdb-service in docker-compose.infrastructure.yml file to an absolute path where you knwo that the system user you are currently logged in as, has permission ot read or write

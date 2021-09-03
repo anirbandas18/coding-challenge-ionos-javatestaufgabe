@@ -176,7 +176,6 @@ public class SegmentationWriter implements ItemWriter<List<LandKundeAuftragColle
         for(LandKundeAuftragCollectionVo csvFileDetails : landKundeAuftragVoList) {
             String bucketName = getBucketName(csvFileDetails.getLand(), csvFileDetails.getTimestamp());
             String csvFileName = getFileName(csvFileDetails.getLand(), csvFileDetails.getTimestamp());
-            //Path csvFilePath = Paths.get(storeBaseLocation.toString(), csvFileDetails.getLand(), csvFileName);
             Path csvFilePath = Paths.get(storageBasePath.toString(), csvFileDetails.getLand(), csvFileName);
             Writer writer  = new StringWriter();
             StatefulBeanToCsv sbc = new StatefulBeanToCsvBuilder(writer)

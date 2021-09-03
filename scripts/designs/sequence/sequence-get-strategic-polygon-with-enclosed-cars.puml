@@ -1,0 +1,37 @@
+@@startuml
+
+title Get strategic polygon by its Id and the cars it encloses
+
+box "client"
+    actor User as U
+end box
+
+box "gateway-service"
+    boundary Gateway as G
+end box
+
+
+box "position-service"
+    control Position as POS
+end box
+
+box "car-service"
+    collections Car as C
+end box
+
+box "polygon-service"
+    collections Polygon as PLY
+end box
+
+U -> G: GET /position-service/position/search/polygon/id/{id}
+G -> POS: GET /position/search/polygon/id/{id}
+POS -> PLY: GET /polygon/search/id/{id}
+PLY -> POS: StrategicPolygonDetailedDTO
+||25||
+POS -> C: GET /car/search
+C -> POS: List<CarDetailsDTO>
+POS -> POS: Business logic to locate all cars within the strategic polygon
+POS -> G: StrategicPolygon2CarPositioningVO
+G -> U: strategic polygon : list of car mapping
+
+@@enduml

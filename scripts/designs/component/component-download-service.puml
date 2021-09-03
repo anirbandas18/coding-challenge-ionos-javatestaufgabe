@@ -1,0 +1,46 @@
+@startuml
+
+title "Component - S3EXPORT Download Service"
+
+node "Download Service" {
+
+    [Download Error Handler] as downloadErrorHandler
+
+    frame "Bucket API" {
+
+        [Bucket Controller] as bucketController
+        [Bucket Service] as bucketService
+        [Bucket Repository] as bucketRepository
+
+        bucketController ..> bucketService
+        bucketService ..> bucketRepository
+
+        bucketController -right-> downloadErrorHandler
+        bucketService -right-> downloadErrorHandler
+
+    }
+
+    frame "File API" {
+
+        [File Controller] as fileController
+        [File Service] as fileService
+        [File Repository] as fileRepository
+
+        fileController ..> fileService
+        fileService ..> fileRepository
+
+        fileController -right-> downloadErrorHandler
+        fileService -right-> downloadErrorHandler
+
+    }
+
+    downloadErrorHandler ..> ErrorVO
+
+}
+
+BucketResponse <.. bucketController
+BucketRequest ..> bucketController
+RawFileContent <.. fileController
+FileRequest ..> fileController
+
+@enduml
