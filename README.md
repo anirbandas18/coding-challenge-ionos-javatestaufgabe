@@ -32,42 +32,69 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 
 ---
 ### MINIMUM SYSTEM REQUIREMENTS
-1. Disk - 6 GB
-2. Memory - 8 GB
-3. Processor - 2 CPU
-4. Network - 100 MBps
-5. Operating System - Ubuntu 20.4/Windows 10/MacOS 10.5
-6. JDK - 11
-7. Python - 3.9
-8. Maven - 3.6.x
-9. Docker - 20.10.x
-10. Docker Compose - 1.28.x
-11. MySQL - 8.0.x
-12. Redis - 3.0.x
-13. MiniO - RELEASE.2021-06-17T00-10-46Z
-14. Zipkin - 2.23.2
+1. Unix based Operating System - Linux or MacOS
+2. Disk - 6 GB
+3. Memory - 8 GB
+4. Processor - 2 CPU
+5. Network - 100 MBps
+6. Operating System - Ubuntu 20.4/Windows 10/MacOS 10.5
 
 ---
-### STEPS TO RUN - MANUALLY
-1.  Open terminal or command prompt
-2.  Go to the root folder of the project `s3export-tool` containing the source code for all services
-3.  Execute `mvn clean package -e` at the root folder containing all the projects to download dependencies, build the artifacts and create docker images of the respective services and batches
-4.  Execute `docker-compose -f docker-compose.infrastructure.yml up` at the root folder containing all the projects to start the infrastructure services for the microservice ecosystem
-5.  If prompted for `Continue with the new image? [yN]` during the docker-compose step, enter y
-6.  Browse to `http://<HOST_SYSTEM-IP>:8761` or `http://localhost:8761` or `http://172.27.0.6:8761` in a browser to see if EUREKA server is up or not
-7.  Browse to `http://<HOST_SYSTEM-IP>:8888/actuator/info` or `http://localhost:8761/actuator/info` or `http://172.27.0.6:8761/actuator/info` in a browser to see if configuration  server is up or not which is denoted by a blank page and no errors
-8.  Wait for EUREKA and configuration server to become healthy
-9.  Execute `docker-compose -f docker-compose.core.yml up` at the root folder containing all the projects to start the core microservices
-6.  If prompted for `Continue with the new image? [yN]` during the docker-compose step, enter y
-7.  Browse to `http://<HOST_SYSTEM-IP>:8761` or `http://localhost:8761` or `http://172.27.0.6:8761` in a browser to see if the all the services are available in EUREKA server or not
-8.  Access the Swagger documentation of individual core microservices viz., car, polygon, position in a browser to execute requests as desired over `http://<HOST-SYSTEM-IP>:8081/<SERVICE-NAME>/<SERVICE-CONTEXT-PATH>/swagger-ui.html`
+### ENSURE THE FOLLOWING ARE AVAILABLE
+1. JDK - 11
+2. Python - 3.9
+3. Maven - 3.6.x
+4. Docker - 20.10.x
+5. Docker Compose - 1.28.x
+6. MySQL - 8.0.x
+7. Redis - 3.0.x
+8. MiniO - RELEASE.2021-06-17T00-10-46Z
+9. Zipkin - 2.23.2
+10. JAVA_HOME and MAVEN_HOME is set on the host system
 
 ---
-### STEPS TO STOP - MANUALLY
-1.  Open terminal or command prompt
-2.  Go to the root folder of the project `s3export-tool` containing the source code for all services
-3.  Execute `docker-compose -f docker-compose.infrastructure.yml down` at the root folder containing all the projects to kill the containers of the infrastructure services for the microservice ecosystem
-4.  Execute `docker-compose -f docker-compose.core.yml down` at the root folder containing all the projects to kill the containers of the core microservices
+### THE FOLLOWING ARE REQUIRED IF NOT CHOOSING THE DOCKER APPROACH
+1. MySQL is running on port 3306
+2. Redis Server is running on port 6379
+3. MiniO object storage is running on port 9000
+4. Logstash is running on port 4560
+5. Elasticsearch is running on port 9200
+6. Kibana is running on port 5601
+7. Zipkin is running on port 9411
+8. Ports 8081, 8761, 8888 are free
+9. Ports 7001, 8001, 9001, 10001, 11001 are free
+
+---
+### STEPS TO INSTALL AND RUN - DOCKER APPROACH
+1. After you have checked out the project from github, open terminal or command prompt on your host system
+2. Go to the root folder of the project `coding-challenge-ionos-javatestaufgabe` under the location where you have checked out the source code
+3. Execute `mvn clean package -e` at the root folder of the project containing all the projects to download dependencies and build the artifacts
+4. Execute `mvn clean install -DskipTests -e` at the root folder of the project to install the artifacts locally
+5. Execute the script `setup.sh` if on a nix system or `setup.bat` if on a win32 system
+6. Go to the location `scripts/docker/compose/nix` under the root folder of the project through terminal
+7. Execute `docker-compose -f stack-1.infrastructure-storage.yml up` at the location to start all the storage service containers for the microservice ecosystem
+8. Execute `docker-compose -f stack-2.infrastructure-logging.yml up` at the location to start all the logging service containers for the microservice ecosystem
+9. Execute `docker-compose -f stack-3.application-operations.yml up` at the location to start all the operation service containers for the microservice ecosystem
+10. Wait for all the docker containers under `stack-3.application-operations.yml` to start 
+11. Open you browser and navigate to `localhost:8761` to verify if the naming-service is up or not. The naming-service is called Eureka Server
+12. Wait until you see Eureka server's home page. Once the naming-service is available and you can view Eureka Server's home page, continue further
+13. Execute `docker-compose -f stack-4.application-web-services.yml up` at the location to start all the web service containers for the microservice ecosystem
+14. Wait for all the web service containers to become available . Verify in Eureka server's dashboard if the following services are listed as UP: `AUFTRAEGE-SERVICE, DOWNLOAD-SERVICE, GATEWAY-SERVICE, KUNDE-SERVICE`
+15. Execute `docker-compose -f stack-5.application-batch-jobs.yml up` at the location to start all the batch job containers for the microservice ecosystem
+16. Wait for all the batch job containers to become available . Verify in Eureka server's dashboard if the following services are listed as UP: `SEED-BATCH, SYNCHRONIZATION-BATCH`
+17. Open your browser and browse to `http://localhost:9001/swagger-ui.html` to access the Swagger documentation console for the download-service
+18. Execute the REST APIs as per the functionality of the system. Refer to the `FEATURES` section to get an idea of the functionality of the system. 
+
+---
+### STEPS TO STOP - DOCKER APPROACH
+1. Open terminal or command prompt
+2. Go to the root folder of the project `coding-challenge-ionos-javatestaufgabe` under the location where you have checked out the source code
+3. Go to the location `scripts/docker/compose/nix` under the root folder of the project
+4. Execute `docker-compose -f stack-5.application-batch-jobs.yml down` at the location to stop all the batch job containers for the microservice ecosystem
+5. Execute `docker-compose -f stack-4.application-web-services.yml up down` at the location to stop all the web service containers for the microservice ecosystem
+6. Execute `docker-compose -f stack-3.application-operations.yml up` at the location to stop all the operation service containers for the microservice ecosystem
+7. Execute `docker-compose -f stack-2.infrastructure-logging.yml up` at the location to stop all the logging service containers for the microservice ecosystem
+8. Execute `docker-compose -f stack-1.infrastructure-storage.yml up` at the location to stop all the storage service containers for the microservice ecosystem
 
 ---
 ### FEATURES
@@ -132,16 +159,6 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 11. Seed Batch updates new Auftraege and Kunden data within short periods of time to make fresh data available for the core features 
 12. Seed batch skips writing a generated `auftraege` or '`kunde` record that it created during its job run if the downstream service for the respective domain is down
 13. Synchronization Batch combines Kunde data with its associated Auftraege data, grouped by country for each Kunde and exports them into an object store for download
-14. JAVA_HOME and MAVEN_HOME is set on the host system
-15. MySQL is running on port 3306
-16. Redis Server is running on port 6379
-17. MiniO object storage is running on port 9000
-18. Logstash is running on port 4560
-19. Elasticsearch is running on port 9200
-20. Kibana is running on port 5601
-21. Zipkin is running on port 9411
-22. Ports 8081, 8761, 8888 are free
-22. Ports 7001, 8001, 9001, 10001, 11001 are free
 
 ---
 ### FUNCTIONAL DECISIONS
@@ -178,12 +195,6 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 19. The algorithm to combine and export `kunde` and `auftrag` as CSV files  has a time complexity of `O(x)` where x is the number of auftraege items in the last N time
 
 ---
-### REST API DOCUMENTATION
-| SERVICE-NAME | API DOCUMENTATION URL |
-| ----------- | ----------- |
-| download-service | http://<GATEWAY-SERVICE-IP or GATEWAY-SERVICE-HOST>:8081/download/swagger-ui.html) |
-
----
 ### BACKLOG
 1. Optimize synchronization-batch by skipping writing to file system first and directly upload to the object storage
 2. download-service to track details of available countries and uploaded files for a date in a database rather than directly querying the object storage
@@ -198,8 +209,18 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 11. Encrypt security credentials in configuration store
 12. Synchronize sequential bootstrap for each service and batch as per service dependency order across all microservices of this project within docker-compose
 
-
-
 ---
 ### ADDITIONAL RESOURCES
 1. In the `scripts` folder under the root folder `s3export-tool` you will find the database scripts, docker compose files and logstash configuration corresponding to this microservice setup
+
+
+---
+### TROUBLESHOOTING
+1. If your build is failing because the artifact `com.teenthofabud.core.common:toab-chassis-sdk:1.1.0-SNAPSHOT` is missing then follow the below steps to fix it
+2. Clone this project from Github: `https://github.com/anirbandas18/toab-chassis-sdk.git`
+3. Open your terminal or command prompt according to your system
+4. Browse to the location where you cloned out the project `toab-chassis-sdk` via terminal or command prompt
+5. Execute the command `mvn clean package -e`
+6. Execute the command `mvn clean install -e`
+7. You should see output on your terminal or command prompt indicating that maven successfully installed the artifact `com.teenthofabud.core.common:toab-chassis-sdk:1.1.0-SNAPSHOT`. 
+8. This should resolve the issue of the missing artifact. Continue with the normal steps to install and run

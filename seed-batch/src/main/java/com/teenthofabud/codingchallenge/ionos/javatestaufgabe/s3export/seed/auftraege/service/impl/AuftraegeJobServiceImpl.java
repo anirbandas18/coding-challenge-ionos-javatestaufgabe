@@ -26,7 +26,7 @@ public class AuftraegeJobServiceImpl implements AuftraegeJobService {
     private Job auftraegeJob;
     private String jobParameterName1;
 
-    @Value("${s3export.seed.job.parameter.1:seed-timestamp}")
+    @Value("${s3export.seed.job.parameter.1}")
     public void setJobParameterName1(String jobParameterName1) {
         this.jobParameterName1 = jobParameterName1;
     }
@@ -46,7 +46,7 @@ public class AuftraegeJobServiceImpl implements AuftraegeJobService {
      * Run a new instance of this functionality's core job called auftraege every configured amount of time as per the cron expression
      * @throws TOABSystemException
      */
-    @Scheduled(cron = "${s3export.seed.job.auftraege.cron:0 */1 * * * ?}")
+    @Scheduled(cron = "${s3export.seed.job.auftraege.cron}")
     @Override
     public synchronized void runJob() throws TOABSystemException {
         try {

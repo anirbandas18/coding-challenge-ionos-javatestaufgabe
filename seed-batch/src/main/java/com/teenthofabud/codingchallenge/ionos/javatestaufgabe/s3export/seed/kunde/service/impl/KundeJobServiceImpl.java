@@ -26,7 +26,7 @@ public class KundeJobServiceImpl implements KundeJobService {
     private Job kundeJob;
     private String jobParameterName1;
 
-    @Value("${s3export.seed.job.parameter.1:seed-timestamp}")
+    @Value("${s3export.seed.job.parameter.1}")
     public void setJobParameterName1(String jobParameterName1) {
         this.jobParameterName1 = jobParameterName1;
     }
@@ -46,7 +46,7 @@ public class KundeJobServiceImpl implements KundeJobService {
      * Run a new instance of this functionality's core job called kunde every configured amount of time as per the cron expression
      * @throws TOABSystemException
      */
-    @Scheduled(cron = "${s3export.seed.job.kunde.cron:0 */2 * * * ?}")
+    @Scheduled(cron = "${s3export.seed.job.kunde.cron}")
     @Override
     public void runJob() throws TOABSystemException {
         try {

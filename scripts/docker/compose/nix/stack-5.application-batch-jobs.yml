@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   seed-batch:
-    image: teenthofabud/s3export-seed-batch:2.5.6-SNAPSHOT
+    image: teenthofabud/s3export-seed-batch:2.5.8-SNAPSHOT
     container_name: seed-batch
     hostname: seed-batch
     restart: on-failure
@@ -11,33 +11,34 @@ services:
       - $HOME/ionos-coding-challenge/s3export-tool/seed-batch:/opt/ionos-javatestaufgabe-s3export/s3export-seed-batch
     ports:
       - 7001:7001
+    networks:
+      s3export:
+        ipv4_address: 172.16.1.12
     environment:
       - SPRING_PROFILES_ACTIVE=development
       - LOGBACK_LOGGING_LEVEL=info
       - SPRING_CLOUD_CONFIG_ENABLED=true
       - LOGSTASH_HOST=localhost
       - LOGSTASH_PORT=4560
-      - SPRING_CLOUD_CONFIG_HOST=localhost
+      - SPRING_CLOUD_CONFIG_HOST=172.16.1.7
       - SPRING_CLOUD_CONFIG_PORT=8888
       - SEED_LOGGING_LEVEL=INFO
       - SEED_SHOW_SQL=false
       - SEED_SQL_COMMENTS=true
       - SEED_FORMAT_SQL=true
-      - SEED_DATABASE_HOST=localhost
+      - SEED_DATABASE_HOST=172.16.1.2
       - SEED_DATABASE_PORT=3306
-      - SEED_EUERKA_HOST=localhost
+      - SEED_EUERKA_HOST=172.16.1.6
       - SEED_EUREKA_PORT=8761
-      - SEED_ZIPKIN_HOST=localhost
+      - SEED_ZIPKIN_HOST=172.16.1.5
       - SEED_ZIPKIN_PORT=9411
-      - SEED_GATEWAY_HOST=localhost
+      - SEED_GATEWAY_HOST=172.16.1.8
       - SEED_GATEWAY_PORT=8081
-      - SEED_CACHE_HOST=localhost
+      - SEED_CACHE_HOST=172.16.1.3
       - SEED_CACHE_PORT=6379
-      - SEED_AUFTRAEGE_CRON="0 0/5 * * * *"
-      - SEED_KUNDE_CRON="0 0/3 * * * *"
 
   synchronization-batch:
-    image: teenthofabud/s3export-synchronization-batch:2.5.6-SNAPSHOT
+    image: teenthofabud/s3export-synchronization-batch:2.5.8-SNAPSHOT
     container_name: synchronization-batch
     hostname: synchronization-batch
     restart: on-failure
@@ -45,28 +46,34 @@ services:
       - $HOME/ionos-coding-challenge/s3export-tool/synchronization-batch:/opt/ionos-javatestaufgabe-s3export/s3export-synchronization-batch
     ports:
       - 8001:8001
+    networks:
+      s3export:
+        ipv4_address: 172.16.1.13
     environment:
       - SPRING_PROFILES_ACTIVE=development
       - LOGBACK_LOGGING_LEVEL=info
       - SPRING_CLOUD_CONFIG_ENABLED=true
       - LOGSTASH_HOST=localhost
       - LOGSTASH_PORT=4560
-      - SPRING_CLOUD_CONFIG_HOST=localhost
+      - SPRING_CLOUD_CONFIG_HOST=172.16.1.7
       - SPRING_CLOUD_CONFIG_PORT=8888
       - SYNC_LOGGING_LEVEL=INFO
       - SYNC_SHOW_SQL=false
       - SYNC_SQL_COMMENTS=true
       - SYNC_FORMAT_SQL=true
-      - SYNC_DATABASE_HOST=localhost
+      - SYNC_DATABASE_HOST=172.16.1.2
       - SYNC_DATABASE_PORT=3306
-      - SYNC_EUERKA_HOST=localhost
+      - SYNC_EUERKA_HOST=172.16.1.6
       - SYNC_EUREKA_PORT=8761
-      - SYNC_ZIPKIN_HOST=localhost
+      - SYNC_ZIPKIN_HOST=172.16.1.5
       - SYNC_ZIPKIN_PORT=9411
-      - SYNC_GATEWAY_HOST=localhost
+      - SYNC_GATEWAY_HOST=172.16.1.8
       - SYNC_GATEWAY_PORT=8081
-      - SYNC_CACHE_HOST=localhost
+      - SYNC_CACHE_HOST=172.16.1.3
       - SYNC_CACHE_PORT=6379
-      - SYNC_OBJECT_STORE_HOST=localhost
+      - SYNC_OBJECT_STORE_HOST=172.16.1.4
       - SYNC_OBJECT_STORE_PORT=9000
-      - SYNC_JOB_CRON="0 0/10 * * * *"
+
+networks:
+  s3export:
+    external: true

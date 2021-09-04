@@ -23,7 +23,7 @@ public class SynchronizationJobServiceImpl implements SynchronizationJobService 
     private Job synchronizationJob;
     private String jobParameterName1;
 
-    @Value("${s3export.sync.job.parameter.1:synchronization-timestamp}")
+    @Value("${s3export.sync.job.parameter.1}")
     public void setJobParameterName1(String jobParameterName1) {
         this.jobParameterName1 = jobParameterName1;
     }
@@ -42,7 +42,7 @@ public class SynchronizationJobServiceImpl implements SynchronizationJobService 
      * Run a new instance of this functionality's core job every configured amount of time as per the cron expression
      * @throws SynchronizationException
      */
-    @Scheduled(cron = "${s3export.sync.job.cron:0 */5 * * * ?}")
+    @Scheduled(cron = "${s3export.sync.job.cron}")
     public synchronized void runJob() throws SynchronizationException {
         try {
             Instant synchronizationInstant = Instant.now();

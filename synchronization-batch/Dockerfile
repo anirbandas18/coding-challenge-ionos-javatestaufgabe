@@ -27,5 +27,4 @@ CMD ["java", "-jar",
 "-DSYNC_CACHE_PORT=${SYNC_CACHE_PORT}",
 "-DSYNC_OBJECT_STORE_HOST=${SYNC_OBJECT_STORE_HOST}",
 "-DSYNC_OBJECT_STORE_PORT=${SYNC_OBJECT_STORE_PORT}",
-"-DSYNC_JOB_CRON=\"${SYNC_JOB_CRON}\"",
 "/opt/ionos-javatestaufgabe-s3export/s3export-synchronization-batch/synchronization-app.jar"]

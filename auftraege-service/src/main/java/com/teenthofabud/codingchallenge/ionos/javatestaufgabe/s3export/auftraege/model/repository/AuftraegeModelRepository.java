@@ -35,15 +35,15 @@ public interface AuftraegeModelRepository extends JpaRepository<AuftraegeModelEn
     public List<AuftraegeModelEntity> findByPrimaryKeyKundenIdContaining(String kundenId);
 
     @Transactional
-    @Query(value = "select * from S3EXPORT_AUFTRAEGE_DB.auftraege where TIMESTAMPDIFF(hour, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) <= :amount", nativeQuery = true)
+    @Query(name = "AuftraegeModelEntity.findAllWithinTheLastNHourNowAsPerUTC", nativeQuery = true)
     public List<AuftraegeModelEntity> findAllWithinTheLastNHourNowAsPerUTC(@Param("amount") Long amount);
 
     @Transactional
-    @Query(value = "select * from S3EXPORT_AUFTRAEGE_DB.auftraege where TIMESTAMPDIFF(minute, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) <= :amount", nativeQuery = true)
+    @Query(name = "AuftraegeModelEntity.findAllWithinTheLastNMinuteNowAsPerUTC", nativeQuery = true)
     public List<AuftraegeModelEntity> findAllWithinTheLastNMinuteNowAsPerUTC(@Param("amount") Long amount);
 
     @Transactional
-    @Query(value = "select * from S3EXPORT_AUFTRAEGE_DB.auftraege where TIMESTAMPDIFF(second, utc_timestamp, str_to_date(lastchange, '%Y-%m-%dT%H:%i:%s+0000')) <= :amount", nativeQuery = true)
+    @Query(name = "AuftraegeModelEntity.findAllWithinTheLastNSecondNowAsPerUTC", nativeQuery = true)
     public List<AuftraegeModelEntity> findAllWithinTheLastNSecondNowAsPerUTC(@Param("amount") Long amount);
 
 

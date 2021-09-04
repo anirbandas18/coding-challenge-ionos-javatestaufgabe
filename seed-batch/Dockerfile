@@ -25,7 +25,5 @@ CMD ["java", "-jar",
 "-DSEED_GATEWAY_PORT=${SEED_GATEWAY_PORT}",
 "-DSEED_CACHE_HOST=${SEED_CACHE_HOST}",
 "-DSEED_CACHE_PORT=${SEED_CACHE_PORT}",
-"-DSEED_AUFTRAEGE_CRON=\"${SEED_AUFTRAEGE_CRON}\"",
-"-DSEED_KUNDE_CRON=\"${SEED_KUNDE_CRON}\"",
 "/opt/ionos-javatestaufgabe-s3export/s3export-seed-batch/seed-app.jar"]
 

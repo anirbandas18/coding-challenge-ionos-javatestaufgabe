@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   gateway-service:
-    image: teenthofabud/s3export-gateway-service:2.5.6-SNAPSHOT
+    image: teenthofabud/s3export-gateway-service:2.5.8-SNAPSHOT
     container_name: gateway-service
     hostname: gateway-service
     restart: on-failure
@@ -11,6 +11,9 @@ services:
       - $HOME/ionos-coding-challenge/s3export-tool/gateway-service:/opt/ionos-javatestaufgabe-s3export/s3export-gateway-service
     ports:
       - 8081:8081
+    networks:
+      s3export:
+        ipv4_address: 172.16.1.8
     environment:
       - SPRING_PROFILES_ACTIVE=development
       - LOGBACK_LOGGING_LEVEL=info
@@ -18,16 +21,16 @@ services:
       - LOGSTASH_ENABLED=false
       - LOGSTASH_HOST=localhost
       - LOGSTASH_PORT=4560
-      - SPRING_CLOUD_CONFIG_HOST=localhost
+      - SPRING_CLOUD_CONFIG_HOST=172.16.1.7
       - SPRING_CLOUD_CONFIG_PORT=8888
       - GATEWAY_LOGGING_LEVEL=INFO
-      - GATEWAY_EUERKA_HOST=localhost
+      - GATEWAY_EUERKA_HOST=172.16.1.6
       - GATEWAY_EUREKA_PORT=8761
-      - GATEWAY_ZIPKIN_HOST=localhost
+      - GATEWAY_ZIPKIN_HOST=172.16.1.5
       - GATEWAY_ZIPKIN_PORT=9411
 
   download-service:
-    image: teenthofabud/s3export-download-service:2.5.6-SNAPSHOT
+    image: teenthofabud/s3export-download-service:2.5.8-SNAPSHOT
     container_name: download-service
     hostname: download-service
     restart: on-failure
@@ -35,29 +38,32 @@ services:
       - $HOME/ionos-coding-challenge/s3export-tool/download-service:/opt/ionos-javatestaufgabe-s3export/s3export-download-service
     ports:
       - 9001:9001
+    networks:
+      s3export:
+        ipv4_address: 172.16.1.9
     environment:
       - SPRING_PROFILES_ACTIVE=development
       - LOGBACK_LOGGING_LEVEL=info
       - SPRING_CLOUD_CONFIG_ENABLED=true
       - LOGSTASH_HOST=localhost
       - LOGSTASH_PORT=4560
-      - SPRING_CLOUD_CONFIG_HOST=localhost
+      - SPRING_CLOUD_CONFIG_HOST=172.16.1.7
       - SPRING_CLOUD_CONFIG_PORT=8888
       - DOWNLOAD_LOGGING_LEVEL=INFO
       - DOWNLOAD_SHOW_SQL=false
       - DOWNLOAD_SQL_COMMENTS=false
       - DOWNLOAD_FORMAT_SQL=false
-      - DOWNLOAD_DATABASE_HOST=localhost
+      - DOWNLOAD_DATABASE_HOST=172.16.1.2
       - DOWNLOAD_DATABASE_PORT=3306
-      - DOWNLOAD_EUERKA_HOST=localhost
+      - DOWNLOAD_EUERKA_HOST=172.16.1.6
       - DOWNLOAD_EUREKA_PORT=8761
-      - DOWNLOAD_ZIPKIN_HOST=localhost
+      - DOWNLOAD_ZIPKIN_HOST=172.16.1.5
       - DOWNLOAD_ZIPKIN_PORT=9411
-      - DOWNLOAD_OBJECT_STORE_HOST=localhost
+      - DOWNLOAD_OBJECT_STORE_HOST=172.16.1.4
       - DOWNLOAD_OBJECT_STORE_PORT=9000
 
   kunde-service:
-    image: teenthofabud/s3export-kunde-service:2.5.6-SNAPSHOT
+    image: teenthofabud/s3export-kunde-service:2.5.8-SNAPSHOT
     container_name: kunde-service
     hostname: kunde-service
     restart: on-failure
@@ -65,27 +71,30 @@ services:
       - $HOME/ionos-coding-challenge/s3export-tool/kunde-service:/opt/ionos-javatestaufgabe-s3export/s3export-kunde-service
     ports:
       - 10001:10001
+    networks:
+      s3export:
+        ipv4_address: 172.16.1.10
     environment:
       - SPRING_PROFILES_ACTIVE=development
       - LOGBACK_LOGGING_LEVEL=info
       - SPRING_CLOUD_CONFIG_ENABLED=true
       - LOGSTASH_HOST=localhost
       - LOGSTASH_PORT=4560
-      - SPRING_CLOUD_CONFIG_HOST=localhost
+      - SPRING_CLOUD_CONFIG_HOST=172.16.1.7
       - SPRING_CLOUD_CONFIG_PORT=8888
       - KUNDE_LOGGING_LEVEL=INFO
       - KUNDE_SHOW_SQL=false
       - KUNDE_SQL_COMMENTS=true
       - KUNDE_FORMAT_SQL=true
-      - KUNDE_DATABASE_HOST=localhost
+      - KUNDE_DATABASE_HOST=172.16.1.2
       - KUNDE_DATABASE_PORT=3306
-      - KUNDE_EUERKA_HOST=localhost
+      - KUNDE_EUERKA_HOST=172.16.1.6
       - KUNDE_EUREKA_PORT=8761
-      - KUNDE_ZIPKIN_HOST=localhost
+      - KUNDE_ZIPKIN_HOST=172.16.1.5
       - KUNDE_ZIPKIN_PORT=9411
 
   auftraege-service:
-    image: teenthofabud/s3export-auftraege-service:2.5.6-SNAPSHOT
+    image: teenthofabud/s3export-auftraege-service:2.5.8-SNAPSHOT
     container_name: auftraege-service
     hostname: auftraege-service
     restart: on-failure
@@ -93,21 +102,28 @@ services:
       - $HOME/ionos-coding-challenge/s3export-tool/auftraege-service:/opt/ionos-javatestaufgabe-s3export/s3export-auftraege-service
     ports:
       - 11001:11001
+    networks:
+      s3export:
+        ipv4_address: 172.16.1.11
     environment:
       - SPRING_PROFILES_ACTIVE=development
       - LOGBACK_LOGGING_LEVEL=info
       - SPRING_CLOUD_CONFIG_ENABLED=true
       - LOGSTASH_HOST=localhost
       - LOGSTASH_PORT=4560
-      - SPRING_CLOUD_CONFIG_HOST=localhost
+      - SPRING_CLOUD_CONFIG_HOST=172.16.1.7
       - SPRING_CLOUD_CONFIG_PORT=8888
       - AUFTRAEGE_LOGGING_LEVEL=INFO
       - AUFTRAEGE_SQL_COMMENTS=true
       - AUFTRAEGE_SHOW_SQL=false
       - AUFTRAEGE_FORMAT_SQL=true
-      - AUFTRAEGE_DATABASE_HOST=localhost
+      - AUFTRAEGE_DATABASE_HOST=172.16.1.2
       - AUFTRAEGE_DATABASE_PORT=3306
-      - AUFTRAEGE_EUERKA_HOST=localhost
+      - AUFTRAEGE_EUERKA_HOST=172.16.1.6
       - AUFTRAEGE_EUREKA_PORT=8761
-      - AUFTRAEGE_ZIPKIN_HOST=localhost
+      - AUFTRAEGE_ZIPKIN_HOST=172.16.1.5
       - AUFTRAEGE_ZIPKIN_PORT=9411
+
+networks:
+  s3export:
+    external: true
