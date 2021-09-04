@@ -105,26 +105,26 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 
 ---
 ### ARCHITECTURE
-[Click here to see](https://i.ibb.co/6RW1HRQ/s3export-tool-architecture.png)
+[//]: # [Click here to see](https://i.ibb.co/6RW1HRQ/s3export-tool-architecture.png)
 ![Click here to see](scripts/designs/deployment/s3export-tool-architecture.png)
 
 ---
 ### COMPONENTS
-[synchronization-batch](https://i.ibb.co/HrfM69k/component-synchronization-batch-Component-S3-EXPORT-Synchronization-Batch.png)
+[//]: # [synchronization-batch](https://i.ibb.co/HrfM69k/component-synchronization-batch-Component-S3-EXPORT-Synchronization-Batch.png)
 ![synchronization-batch](scripts/designs/component/component-synchronization-batch-Component___S3EXPORT_Synchronization_Batch.png)
 
-[download-service](https://i.ibb.co/x3wrwLs/component-download-service-Component-S3-EXPORT-Download-Service.png)
+[//]: # [download-service](https://i.ibb.co/x3wrwLs/component-download-service-Component-S3-EXPORT-Download-Service.png)
 ![download-service](scripts/designs/component/component-download-service-Component___S3EXPORT_Download_Service.png)
 
 ---
 ### BUSINESS FLOWS SEQUENCES
-[Synchronize and export kunde and auftraege data every N time](https://i.ibb.co/5YvhCwZ/sequence-synchronize-auftraege-and-kunde-data-every-N-time-and-export-Synchronize-Auftraege-and-Kund.png)
+[//]: # [Synchronize and export kunde and auftraege data every N time](https://i.ibb.co/5YvhCwZ/sequence-synchronize-auftraege-and-kunde-data-every-N-time-and-export-Synchronize-Auftraege-and-Kund.png)
 ![Synchronize and export kunde and auftraege data every N time](scripts/designs/sequence/sequence-synchronize-auftraege-and-kunde-data-every-N-time-and-export-Synchronize_Auftraege_and_Kunde_data_for_the_past_N_time__viz___5_second_or_30_minute_or_1_hour__and_Export.png)
 
-[Get list of all countries](https://i.ibb.co/L1RW4QY/sequence-get-list-of-all-available-countires-Get-list-of-all-available-countries.png)
+[//]: # [Get list of all countries](https://i.ibb.co/L1RW4QY/sequence-get-list-of-all-available-countires-Get-list-of-all-available-countries.png)
 ![Get list of all countries](scripts/designs/sequence/sequence-get-list-of-all-available-countires-Get_list_of_all_available_countries.png)
 
-[Download latest kunde and auftraege data by country](https://i.ibb.co/FY5KdG8/sequence-download-latest-kunde-auftraege-data-by-country-as-csv-Download-latest-Kunde-Auftraege-data.png)
+[//]: # [Download latest kunde and auftraege data by country](https://i.ibb.co/FY5KdG8/sequence-download-latest-kunde-auftraege-data-by-country-as-csv-Download-latest-Kunde-Auftraege-data.png)
 ![Download kunde and auftraege data by country](scripts/designs/sequence/sequence-download-latest-kunde-auftraege-data-by-country-as-csv-Download_latest_Kunde_Auftraege_data_by_country_as_CSV.png)
 
 ---
@@ -189,7 +189,7 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 14. Each microservice has a REST webservice error handler that catches any business specific exception to translate them into appropriate error messages and HTTP status codes
 15. Sleuth and Zipkin has been added to each of the core microservices for the purpose of tracing distributed requests across multiple microservices
 16. Application specific configuration changes are loaded and propagated downstream in the order as follows: java system variables, bootstrap.properties, <APPLICATION_NAME>-<PROFILE>.properties in configuration server
-#17. All services have been assigned static IPs when running as docker containers where the subnet has a capacity of accommodating 2^25 -1 machines for scalability
+[//]: # 17. All services have been assigned static IPs when running as docker containers where the subnet has a capacity of accommodating 2^25 -1 machines for scalability
 17. Configuration store for all services and batches is chosen as a remote git repository for distributed management
 18. The algorithm to seed `auftrag` and `kunde` schema uses a library called `javafaker` to  generate the attributes of each schema in their respective job flows and has a time complexity of `O(n)` where n is the batch size
 19. The algorithm to combine and export `kunde` and `auftrag` as CSV files  has a time complexity of `O(x)` where x is the number of auftraege items in the last N time
