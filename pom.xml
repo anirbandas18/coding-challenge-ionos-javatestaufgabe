@@ -50,7 +50,6 @@
         <embedded-redis.version>0.7.3</embedded-redis.version>
         <tika-core.version>2.1.0</tika-core.version>
         <javafaker.version>1.0.2</javafaker.version>
-        <!--<findify-s3mock.version>0.2.6</findify-s3mock.version>-->
         <s3mock.version>2.2.1</s3mock.version>
     </properties>
 

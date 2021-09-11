@@ -46,7 +46,7 @@ public class ObjectRepositoryMinioImpl implements FileRepository, InitializingBe
         this.fileTimestampFormat = fileTimestampFormat;
     }
 
-    @Value("${s3export.download.delimitter.file.name:+}")
+    @Value("${s3export.download.delimitter.file.name}")
     public void setFileNameDelimitter(String fileNameDelimitter) {
         this.fileNameDelimitter = fileNameDelimitter;
     }

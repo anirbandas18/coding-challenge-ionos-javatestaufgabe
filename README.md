@@ -91,10 +91,10 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 2. Go to the root folder of the project `coding-challenge-ionos-javatestaufgabe` under the location where you have checked out the source code
 3. Go to the location `scripts/docker/compose/nix` under the root folder of the project
 4. Execute `docker-compose -f stack-5.application-batch-jobs.yml down` at the location to stop all the batch job containers for the microservice ecosystem
-5. Execute `docker-compose -f stack-4.application-web-services.yml up down` at the location to stop all the web service containers for the microservice ecosystem
-6. Execute `docker-compose -f stack-3.application-operations.yml up` at the location to stop all the operation service containers for the microservice ecosystem
-7. Execute `docker-compose -f stack-2.infrastructure-logging.yml up` at the location to stop all the logging service containers for the microservice ecosystem
-8. Execute `docker-compose -f stack-1.infrastructure-storage.yml up` at the location to stop all the storage service containers for the microservice ecosystem
+5. Execute `docker-compose -f stack-4.application-web-services.yml down` at the location to stop all the web service containers for the microservice ecosystem
+6. Execute `docker-compose -f stack-3.application-operations.yml down` at the location to stop all the operation service containers for the microservice ecosystem
+7. Execute `docker-compose -f stack-2.infrastructure-logging.yml down` at the location to stop all the logging service containers for the microservice ecosystem
+8. Execute `docker-compose -f stack-1.infrastructure-storage.yml down` at the location to stop all the storage service containers for the microservice ecosystem
 
 ---
 ### FEATURES
@@ -199,15 +199,27 @@ I had a lot of fun in completing this exercise because of the wide variety of to
 1. Optimize synchronization-batch by skipping writing to file system first and directly upload to the object storage
 2. download-service to track details of available countries and uploaded files for a date in a database rather than directly querying the object storage
 3. Event based communication between synchronization-batch and download-service to exchange uploaded file details via publish-subscribe model
-4. Implement retry logic in synchronization-batch
+4. Implement retry logic in synchronization-batch through spring AOP
 5. Better bucket and object management logic within object storage 
 6. Implement circuit breaker in gateway-service for all exposed services along with their dedicated fallbacks
-7. Health monitoring dashboard for all web services and batch jobs 
-8. Block direct access to all web services and batch jobs, except through gateway
-9. Enable security on all infrastructure services and core microservices
-10. Enable authentication of redis cache server 
-11. Encrypt security credentials in configuration store
-12. Synchronize sequential bootstrap for each service and batch as per service dependency order across all microservices of this project within docker-compose
+7. Implement error handling in synchronization batch when kunde-service request trips circuit breaker
+8. Implement proper audit service for all success and failure actions n download service
+9. Health monitoring dashboard for all web services and batch jobs 
+10. Block direct access to all web services and batch jobs, except through gateway
+11. Enable security on all infrastructure services and core microservices
+12. Enable authentication of redis cache server 
+13. Encrypt security credentials in configuration store
+14. Synchronize sequential bootstrap for each service and batch as per service dependency order across all microservices of this project within docker-compose
+15. Fix internal IP based redirect by eureka server of registered service to use host system's hostname
+16. Implement error handling in synchronization-batch to support job failure
+17. Develop country microservice
+18. Synchronization job to use country microservice for creating buckets    
+19. Change bucket nomenclature ot include only found country names
+18. Create logical paths inside each country bucket based on the date for the current day in `yyy-MM-dd` format
+19. All CSV files for a country would be stored under the following path: `<COUNTRY_NAME>/<yyyy-MM-dd>/<COUNTRY_NAME>+<yyyy-MM-dd_HH-mm-ss>.csv` in their respective bucket
+20. Dynamic ELK index per service/batch
+21. Monitoring using Grafana and Prometheus
+22. Metrics using micrometer
 
 ---
 ### ADDITIONAL RESOURCES
